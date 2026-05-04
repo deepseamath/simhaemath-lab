@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>심해수학 LAB</title>
   <style>
@@ -426,6 +427,192 @@
       .child-open { grid-column: 2; width: fit-content; }
       .mind-input-row { grid-template-columns: 1fr; }
     }
+
+
+    /* Vercel 안전 표시 보정: 한글 깨짐·가로 잘림 방지 */
+    html, body { max-width: 100%; overflow-x: hidden; }
+    body { -webkit-text-size-adjust: 100%; text-rendering: optimizeLegibility; }
+    .container { width: min(1180px, calc(100% - 28px)); }
+    .brand-title, .intro-title, .section-title, .lane-title, .tool-card h4, .child-name {
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+    .main-area { min-width: 0; overflow: hidden; }
+    .tools-grid.lab-board {
+      grid-template-columns: repeat(3, minmax(238px, 1fr));
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      padding: 2px 2px 10px;
+    }
+    .lab-lane { min-width: 238px; }
+    .lane-tools { max-height: 56vh; }
+    @media (max-width: 1250px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .intro-card { max-width: none; }
+      .tools-grid.lab-board { grid-template-columns: repeat(3, minmax(260px, 1fr)); }
+      .lane-tools { height: 430px; max-height: none; }
+    }
+    @media (max-width: 760px) {
+      .tools-grid.lab-board {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 14px;
+      }
+      .lab-lane {
+        flex: 0 0 88%;
+        scroll-snap-align: start;
+      }
+      .tabs { grid-template-columns: 1fr; }
+    }
+
+
+    /* 정리 버전: 선택한 LAB 한 영역만 펼쳐 보이도록 구성 */
+    .main-area {
+      overflow: visible;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .tab-card {
+      min-height: 110px;
+    }
+    #tools {
+      margin-top: 0;
+    }
+    #tools .section-head {
+      margin: 4px 0 10px;
+    }
+    .section-title {
+      font-size: clamp(24px, 3.2vw, 36px);
+      line-height: 1.25;
+    }
+    .section-guide-mini {
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.55;
+    }
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+    .filter-chip {
+      border: 1px solid #dceff8;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #5f7080;
+      font-size: 12px;
+      font-weight: 850;
+      box-shadow: 0 5px 12px rgba(92, 126, 148, 0.06);
+      transition: .18s ease;
+    }
+    .filter-chip:hover,
+    .filter-chip.active {
+      color: white;
+      background: var(--bluegray);
+      border-color: var(--bluegray);
+      transform: translateY(-1px);
+    }
+    .tools-grid.active-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+      max-height: min(610px, calc(100vh - 350px));
+      min-height: 360px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 4px 8px 14px 2px;
+      scroll-behavior: smooth;
+    }
+    .tools-grid.active-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    .tools-grid.active-list::-webkit-scrollbar-thumb {
+      background: #cde5f2;
+      border-radius: 999px;
+    }
+    .tools-grid.active-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .tools-grid.active-list .tool-card {
+      min-height: 190px;
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+    .tools-grid.active-list .tool-card:hover {
+      background: white;
+    }
+    .tools-grid.active-list .tool-card h4 {
+      font-size: 16px;
+      line-height: 1.42;
+    }
+    .tools-grid.active-list .tool-card p {
+      font-size: 13px;
+      line-height: 1.62;
+    }
+    .tools-grid.active-list .tool-bottom {
+      margin-top: 14px;
+      padding-top: 12px;
+    }
+    .empty-tools {
+      grid-column: 1 / -1;
+      padding: 32px;
+      border: 1px dashed #bfe4f5;
+      border-radius: 26px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,.72);
+      font-weight: 750;
+    }
+    .favorites-strip {
+      order: -1;
+    }
+    .favorites-strip.show {
+      display: flex;
+    }
+    @media (max-width: 1250px) {
+      .hero-grid {
+        grid-template-columns: .72fr 1.28fr;
+      }
+      .tools-grid.active-list {
+        max-height: 580px;
+      }
+    }
+    @media (max-width: 980px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .tools-grid.active-list {
+        max-height: none;
+        min-height: 0;
+        overflow: visible;
+      }
+    }
+    @media (max-width: 760px) {
+      .tabs {
+        grid-template-columns: 1fr;
+      }
+      .tools-grid.active-list {
+        grid-template-columns: 1fr;
+      }
+      .category-filters {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+      }
+      .filter-chip {
+        white-space: nowrap;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -518,10 +705,11 @@
               <div>
                 <p class="section-label"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4V4zM13 4h7v7h-7V4zM4 13h7v7H4v-7zM13 13h7v7h-7v-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>LAB Board</p>
                 <h3 class="section-title" id="toolSectionTitle">LAB별 바로가기</h3>
-                <p class="section-guide-mini" id="toolSectionDesc">업무, 수학, 담임 도구를 영역별로 스크롤하며 바로 실행할 수 있습니다.</p>
+                <p class="section-guide-mini" id="toolSectionDesc">선택한 LAB에 맞는 도구를 분류별로 확인할 수 있습니다.</p>
               </div>
             </div>
-            <div class="tools-grid" id="toolsGrid"></div>
+            <div class="category-filters" id="categoryFilters" aria-label="세부 분류"></div>
+            <div class="tools-grid active-list" id="toolsGrid"></div>
           </section>
         </div>
       </section>
@@ -1132,6 +1320,7 @@
 };
     let currentType = "work";
     let expandedToolId = null;
+    let currentFilter = "all";
     const FAVORITE_KEY = "simhaemath-lab-favorites-clean-v1";
 
     const featureTitle = document.getElementById("featureTitle");
@@ -1258,6 +1447,25 @@
       </article>`;
     }
 
+    function renderCategoryFilters(type) {
+      const filterWrap = document.getElementById("categoryFilters");
+      if (!filterWrap) return;
+      const group = data[type];
+      const tags = Array.from(new Set(group.tools.map((tool) => tool.tag).filter(Boolean)));
+      const counts = group.tools.reduce((acc, tool) => {
+        const tag = tool.tag || "기타";
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+      }, {});
+      const items = [{ key: "all", label: "전체", count: group.tools.length }, ...tags.map((tag) => ({ key: tag, label: tag, count: counts[tag] || 0 }))];
+      filterWrap.innerHTML = items.map((item) => `<button class="filter-chip ${currentFilter === item.key ? "active" : ""}" type="button" onclick='setFilter(${JSON.stringify(item.key)})'>${escapeHtml(item.label)} ${item.count}</button>`).join("");
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter || "all";
+      renderTools(currentType);
+    }
+
     function renderTools(type = currentType) {
       currentType = type || currentType || "work";
       const current = data[currentType];
@@ -1265,49 +1473,32 @@
       featureDesc.textContent = current.desc;
       const labelMap = { work: "업무 LAB", math: "수학 LAB", classroom: "담임 LAB" };
       const guideMap = {
-        work: "업무 흐름을 가볍게 만드는 외부 서비스와 자동화 도구를 한곳에서 연결합니다.",
-        math: "수업 자료, 연산 앱, 강의실, 타이머 등 수학 수업 운영 도구를 모았습니다.",
-        classroom: "담임 운영에 필요한 자리 배치, 소속 정리, 이벤트, 결과 조회 도구를 정리합니다."
+        work: "문서 작성, 수업 운영, AI 보조, 파일 정리 도구를 업무 흐름에 맞게 연결합니다.",
+        math: "강의실, 연산 앱, 마인드맵, 수업 타이머를 수학 수업 흐름에 맞게 실행합니다.",
+        classroom: "자리 배치, 소속 정리, 학급 이벤트, 결과 조회를 담임 운영 장면에 맞게 활용합니다."
       };
-      toolSectionTitle.textContent = "LAB별 바로가기";
-      if (toolSectionDesc) toolSectionDesc.textContent = "업무, 수학, 담임 도구를 영역별로 스크롤하며 바로 실행할 수 있습니다.";
+      toolSectionTitle.textContent = `LAB별 바로가기 ▶ ${labelMap[currentType]}`;
+      if (toolSectionDesc) toolSectionDesc.textContent = guideMap[currentType] || current.desc;
       tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === currentType));
 
+      renderCategoryFilters(currentType);
       const favs = getFavorites();
-      toolsGrid.className = "tools-grid lab-board";
-      const order = ["work", "math", "classroom"];
-      const shortLabel = { work: "업무", math: "수학", classroom: "담임" };
-      const laneGuide = {
-        work: "업무 사이트와 자동화 도구를 빠르게 확인합니다.",
-        math: "수업 앱과 강의 자료를 수업 흐름에 맞게 엽니다.",
-        classroom: "담임 운영 앱을 행사와 학급 관리에 맞게 활용합니다."
-      };
-      toolsGrid.innerHTML = order.map((laneType) => {
-        const group = data[laneType];
-        return `<section class="lab-lane ${laneType === currentType ? "active-lane" : ""}" data-lane="${laneType}">
-          <div class="lane-head" onclick='setActive(${JSON.stringify(laneType)})'>
-            <div class="lane-head-left">
-              <p class="lane-kicker">${shortLabel[laneType]} LAB</p>
-              <h3 class="lane-title">${escapeHtml(group.title)}</h3>
-              <p class="lane-desc">${escapeHtml(laneGuide[laneType] || group.desc)}</p>
-            </div>
-            <span class="lane-count">${group.tools.length}개</span>
-          </div>
-          <div class="lane-tools" aria-label="${shortLabel[laneType]} LAB 도구 목록">
-            ${group.tools.map((tool) => renderToolCard(laneType, tool, favs)).join("")}
-          </div>
-        </section>`;
-      }).join("");
+      toolsGrid.className = "tools-grid active-list";
+      const filteredTools = current.tools.filter((tool) => currentFilter === "all" || tool.tag === currentFilter);
+      toolsGrid.innerHTML = filteredTools.length
+        ? filteredTools.map((tool) => renderToolCard(currentType, tool, favs)).join("")
+        : `<div class="empty-tools">이 분류에 표시할 도구가 없습니다.</div>`;
       renderFavorites();
     }
 
     function setActive(type) {
       expandedToolId = null;
       currentType = type;
+      currentFilter = "all";
       renderTools(type);
-      const lane = document.querySelector(`[data-lane="${type}"]`);
-      if (lane) lane.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      document.getElementById("tools")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
+
     tabButtons.forEach((button) => button.addEventListener("click", () => setActive(button.dataset.tab)));
 
     // Counts
