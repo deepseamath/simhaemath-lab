@@ -51,6 +51,7 @@
     }
     .logo-mark img {
       width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 999px;
+      filter: saturate(0.72) brightness(0.94) contrast(0.90) opacity(0.94);
     }
     .brand-title { margin: 0; font-size: 20px; line-height: 1.1; font-weight: 750; letter-spacing: -0.02em; }
     .brand-subtitle { margin: 4px 0 0; color: var(--muted2); font-size: 12px; letter-spacing: 0.04em; }
@@ -107,6 +108,7 @@
     }
     .mini-icon img {
       width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 999px;
+      filter: saturate(0.72) brightness(0.94) contrast(0.90) opacity(0.94);
     }
     .eyebrow { margin: 0; color: #5ea7cf; font-weight: 650; font-size: 14px; }
     .intro-title { margin: 0; font-size: clamp(34px, 5vw, 46px); line-height: 1.18; letter-spacing: -0.05em; color: #334155; font-weight: 780; }
@@ -724,11 +726,11 @@
   <div class="modal-backdrop" id="mindModal" role="dialog" aria-modal="true" aria-label="개념 마인드맵 만들기">
     <div class="modal">
       <div class="modal-head">
-        <div><h3 class="modal-title">개념 마인드맵 만들기</h3><p class="modal-desc">수학 주제를 입력하면 이미지형 마인드맵을 바로 만들 수 있고, NotebookLM으로 보낼 프롬프트도 복사됩니다.</p></div>
+        <div><h3 class="modal-title">중학교 수학 개념 마인드맵</h3><p class="modal-desc">수학 주제를 입력하면 중학교 교과서 흐름에 맞춰 정의, 성질, 공식, 대표 예시, 오개념까지 정리한 마인드맵을 생성합니다.</p></div>
         <button class="close-btn" type="button" id="mindClose">×</button>
       </div>
       <div class="mind-input-row">
-        <input class="mind-input" id="mindTopic" placeholder="예: 일차함수, 유리수의 사칙계산, 삼각비" />
+        <input class="mind-input" id="mindTopic" placeholder="예: 일차함수, 유리수의 사칙계산, 피타고라스 정리, 삼각비" />
         <button class="mind-btn primary" type="button" id="mindCreate">이미지 만들기</button>
       </div>
       <div class="mind-actions">
@@ -736,8 +738,8 @@
         <button class="mind-btn" type="button" id="mindCopy">프롬프트 복사</button>
         <button class="mind-btn" type="button" id="mindDownload">PNG 저장</button>
       </div>
-      <div class="mind-canvas-wrap"><canvas id="mindCanvas" width="1200" height="760"></canvas></div>
-      <p class="mind-note">NotebookLM은 새 창으로 열립니다. 자동 생성 프롬프트를 붙여 넣어 자료 정리와 확장에 활용하면 됩니다.</p>
+      <div class="mind-canvas-wrap"><canvas id="mindCanvas" width="1400" height="900"></canvas></div>
+      <p class="mind-note">NotebookLM 열기를 누르면 중학교 수학 교과서 수준으로 정리하도록 설계한 프롬프트가 복사됩니다. 필요하면 붙여 넣어 자료를 더 확장하세요.</p>
     </div>
   </div>
 
@@ -855,7 +857,7 @@
       {
         "id": "math-mindmap",
         "title": "개념 마인드맵",
-        "desc": "주제를 입력해 핵심 구조를 이미지로 정리하고 NotebookLM 탐구로 확장합니다.",
+        "desc": "중학교 교과서 흐름에 맞춰 정의, 공식, 예시, 오개념을 한 장의 마인드맵으로 정리합니다.",
         "tag": "마인드맵",
         "status": "즉시 제작",
         "action": "주제 입력",
@@ -1627,80 +1629,230 @@
     mindModal.addEventListener("click", (e) => { if (e.target === mindModal) closeMindModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeMindModal(); closeClassTimerModal(); } });
 
-    function wrapText(text, maxChars) {
+    function wrapText(text, maxChars, maxLines = 4) {
       const s = String(text || "").trim();
       if (!s) return [""];
-      const parts = s.split(/\s+/);
+      const hasSpace = s.includes(" ");
+      const tokens = hasSpace ? s.split(/\s+/) : s.split("");
       const lines = [];
       let line = "";
-      parts.forEach((part) => {
-        if ((line + " " + part).trim().length > maxChars) {
-          if (line) lines.push(line);
-          if (part.length > maxChars) {
-            for (let i = 0; i < part.length; i += maxChars) lines.push(part.slice(i, i + maxChars));
-            line = "";
-          } else line = part;
-        } else line = (line + " " + part).trim();
+      tokens.forEach((token) => {
+        const next = hasSpace ? (line + " " + token).trim() : line + token;
+        if (next.length > maxChars) { if (line) lines.push(line); line = token; }
+        else line = next;
       });
       if (line) lines.push(line);
-      return lines.slice(0, 4);
+      return lines.slice(0, maxLines);
     }
 
     function roundRect(x, y, w, h, r) {
-      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
     }
 
-    function drawTextBox(text, x, y, w, h, fontSize = 24, weight = 700) {
-      roundRect(x, y, w, h, 24);
-      ctx.fillStyle = "#ffffff"; ctx.fill();
-      ctx.strokeStyle = "#d9edf8"; ctx.lineWidth = 3; ctx.stroke();
-      ctx.fillStyle = "#334155"; ctx.font = `${weight} ${fontSize}px Apple SD Gothic Neo, Noto Sans KR, sans-serif`;
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      const maxChars = Math.max(7, Math.floor(w / (fontSize * 0.72)));
-      const lines = wrapText(text, maxChars);
-      const lineH = fontSize * 1.35;
-      const startY = y + h / 2 - ((lines.length - 1) * lineH) / 2;
-      lines.forEach((line, i) => ctx.fillText(line, x + w / 2, startY + i * lineH));
+    const middleMathMindmapBank = [
+      { keys:["유리수","정수","사칙","부호","연산"], title:"유리수의 사칙계산", grade:"중1 · 수와 연산", branches:[
+        {head:"교과서 핵심", bullets:["양수·음수와 0을 수직선에서 이해", "유리수는 분수 꼴로 나타낼 수 있는 수", "부호와 절댓값을 분리해 계산"]},
+        {head:"주요 용어", bullets:["정수, 유리수, 절댓값, 반대수", "덧셈의 교환·결합법칙", "곱셈의 분배법칙"]},
+        {head:"계산 절차", bullets:["덧셈·뺄셈은 부호와 절댓값 비교", "곱셈·나눗셈은 부호 먼저 결정", "괄호 → 거듭제곱 → 곱셈·나눗셈 → 덧셈·뺄셈"]},
+        {head:"대표 예시", bullets:["기온 변화, 수입·지출, 해수면 높이", "(-3)+(+5), (-2)×(-4)", "분수와 소수를 유리수로 해석"]},
+        {head:"오개념 점검", bullets:["음수끼리 더하면 항상 양수가 아님", "뺄셈은 반대수의 덧셈으로 바꿈", "나눗셈은 역수의 곱셈으로 처리"]},
+        {head:"연결 단원", bullets:["문자의 식 계산의 기초", "일차방정식의 이항과 계산", "함수식 값 구하기로 확장"]}
+      ]},
+      { keys:["일차방정식","방정식","해","이항"], title:"일차방정식", grade:"중1 · 문자와 식", branches:[
+        {head:"교과서 핵심", bullets:["등식의 성질로 미지수의 값을 찾음", "좌변과 우변을 같게 하는 값이 해", "일차식으로 정리되는 방정식"]},
+        {head:"주요 용어", bullets:["미지수, 계수, 상수항, 해", "등식의 성질, 이항", "검산과 참인 등식"]},
+        {head:"풀이 절차", bullets:["괄호를 풀고 동류항 정리", "미지수항은 한쪽, 상수항은 반대쪽", "계수로 나누고 해를 검산"]},
+        {head:"대표 예시", bullets:["나이, 거리, 금액, 개수 상황", "3x+2=17 형태", "문장을 식으로 번역"]},
+        {head:"오개념 점검", bullets:["이항할 때 부호 변화 확인", "양변에 같은 연산을 해야 함", "해를 원래 식에 대입"]},
+        {head:"연결 단원", bullets:["일차부등식과 연립방정식", "일차함수의 그래프와 교점", "실생활 문제 해결"]}
+      ]},
+      { keys:["일차부등식","부등식","부등호","범위"], title:"일차부등식", grade:"중2 · 문자와 식", branches:[
+        {head:"교과서 핵심", bullets:["수의 크기 관계를 부등호로 표현", "해는 조건을 만족하는 수의 범위", "수직선 위에 해를 나타냄"]},
+        {head:"주요 용어", bullets:["부등호, 해, 해집합", "이상·이하·초과·미만", "수직선 표현"]},
+        {head:"풀이 절차", bullets:["방정식처럼 항을 정리", "음수로 곱하거나 나누면 방향 반대", "해를 수직선과 말로 표현"]},
+        {head:"대표 예시", bullets:["예산, 인원, 시간 제한 상황", "2x-3≤7 형태", "최소·최대 조건 해석"]},
+        {head:"오개념 점검", bullets:["음수 곱셈에서 부등호 방향 확인", "경계 포함 여부 구분", "문제 조건의 단위 확인"]},
+        {head:"연결 단원", bullets:["연립부등식과 함수의 범위", "실생활 최적 조건 판단", "그래프 해석으로 확장"]}
+      ]},
+      { keys:["일차함수","함수","기울기","절편","그래프"], title:"일차함수", grade:"중2 · 함수", branches:[
+        {head:"교과서 핵심", bullets:["x가 정해지면 y가 하나 정해지는 관계", "y=ax+b 꼴의 함수", "기울기와 y절편으로 그래프 해석"]},
+        {head:"주요 용어", bullets:["함수, 변수, 함숫값", "기울기, y절편, x절편", "증가·감소와 그래프"]},
+        {head:"그래프 절차", bullets:["y절편을 먼저 표시", "기울기로 한 점 더 찾기", "두 점을 지나도록 직선 그리기"]},
+        {head:"대표 예시", bullets:["요금제, 이동 거리, 물의 양 변화", "y=2x+3 형태", "표·식·그래프를 연결"]},
+        {head:"오개념 점검", bullets:["기울기는 x가 1 증가할 때 y의 변화량", "b는 y축과 만나는 값", "x절편과 y절편을 구분"]},
+        {head:"연결 단원", bullets:["일차방정식의 그래프", "연립방정식의 해와 교점", "이차함수 해석의 기초"]}
+      ]},
+      { keys:["연립방정식","연립","가감법","대입법"], title:"연립일차방정식", grade:"중2 · 문자와 식", branches:[
+        {head:"교과서 핵심", bullets:["두 방정식을 동시에 만족하는 해 탐색", "해는 두 직선의 교점으로 해석", "두 조건을 식으로 세움"]},
+        {head:"주요 용어", bullets:["연립방정식, 해, 순서쌍", "대입법, 가감법", "교점과 그래프"]},
+        {head:"풀이 절차", bullets:["한 미지수를 없애는 전략 선택", "대입법 또는 가감법 적용", "구한 값을 두 식에 대입"]},
+        {head:"대표 예시", bullets:["가격과 개수, 거리와 시간", "x+y=10, 2x+y=16", "두 조건을 만족하는 상황"]},
+        {head:"오개념 점검", bullets:["순서쌍의 x와 y 위치 확인", "가감 전 계수 맞추기", "한 식만 만족하면 해가 아님"]},
+        {head:"연결 단원", bullets:["일차함수의 그래프와 교점", "실생활 문제 해결", "연립부등식으로 확장"]}
+      ]},
+      { keys:["피타고라스","직각삼각형","빗변"], title:"피타고라스 정리", grade:"중2 · 도형의 성질", branches:[
+        {head:"교과서 핵심", bullets:["직각삼각형 세 변의 길이 관계", "빗변의 제곱은 두 직각변 제곱의 합", "길이와 거리 계산에 활용"]},
+        {head:"주요 용어", bullets:["직각삼각형, 빗변, 직각변", "제곱, 제곱근", "거리와 대각선"]},
+        {head:"공식·절차", bullets:["a²+b²=c²", "빗변과 직각변을 구분", "모르는 변을 문자로 두고 계산"]},
+        {head:"대표 예시", bullets:["사다리 길이, 운동장 대각선", "좌표평면의 두 점 사이 거리", "정사각형 대각선 구하기"]},
+        {head:"오개념 점검", bullets:["가장 긴 변이 빗변인지 확인", "직각삼각형에서만 사용", "길이는 양수로 선택"]},
+        {head:"연결 단원", bullets:["제곱근과 무리수", "삼각비의 기초", "좌표평면 거리 공식"]}
+      ]},
+      { keys:["삼각비","사인","코사인","탄젠트","sin","cos","tan"], title:"삼각비", grade:"중3 · 도형과 측정", branches:[
+        {head:"교과서 핵심", bullets:["직각삼각형에서 각과 변의 비율 연결", "같은 크기의 각은 삼각비가 일정", "높이와 거리 측정에 활용"]},
+        {head:"주요 용어", bullets:["sin, cos, tan", "빗변, 대변, 인접변", "각의 크기와 변의 비"]},
+        {head:"공식·절차", bullets:["sin=대변/빗변", "cos=인접변/빗변", "tan=대변/인접변"]},
+        {head:"대표 예시", bullets:["건물 높이, 경사로 길이", "그림에서 기준각 표시", "표나 계산기로 값 확인"]},
+        {head:"오개념 점검", bullets:["기준각에 따라 대변과 인접변이 바뀜", "빗변은 직각의 맞은편", "직각삼각형 조건 확인"]},
+        {head:"연결 단원", bullets:["피타고라스 정리", "닮음과 비례", "고등학교 삼각함수의 기초"]}
+      ]},
+      { keys:["제곱근","무리수","실수","근호"], title:"제곱근과 실수", grade:"중3 · 수와 연산", branches:[
+        {head:"교과서 핵심", bullets:["제곱해서 어떤 수가 되는 수", "유리수와 무리수를 합쳐 실수", "근호로 정확한 값을 표현"]},
+        {head:"주요 용어", bullets:["제곱근, 근호, 무리수", "실수, 유리수", "완전제곱수"]},
+        {head:"계산 절차", bullets:["근호 안의 완전제곱수 찾기", "근호 밖으로 꺼내 간단히 하기", "동류근호끼리 계산"]},
+        {head:"대표 예시", bullets:["√9=3, √2는 무리수", "정사각형 넓이와 한 변", "수직선 위 실수의 위치"]},
+        {head:"오개념 점검", bullets:["√a는 보통 음수가 아닌 값", "√a+√b를 √(a+b)로 계산하지 않기", "근삿값과 정확한 값 구분"]},
+        {head:"연결 단원", bullets:["피타고라스 정리", "이차방정식", "이차함수의 그래프"]}
+      ]},
+      { keys:["인수분해","다항식","전개","곱셈공식"], title:"다항식과 인수분해", grade:"중3 · 문자와 식", branches:[
+        {head:"교과서 핵심", bullets:["다항식을 곱의 형태로 나타냄", "전개와 인수분해는 반대 과정", "공통인수와 곱셈공식 활용"]},
+        {head:"주요 용어", bullets:["단항식, 다항식, 항, 계수", "공통인수, 완전제곱식", "합차공식"]},
+        {head:"풀이 절차", bullets:["공통인수 먼저 확인", "항의 개수와 꼴 파악", "전개로 검산"]},
+        {head:"대표 예시", bullets:["x²+5x+6", "a²-b²=(a+b)(a-b)", "넓이 모델로 곱 구조 확인"]},
+        {head:"오개념 점검", bullets:["공통인수를 빠뜨리지 않기", "부호가 다른 항의 공식 구분", "인수분해 후 다시 전개"]},
+        {head:"연결 단원", bullets:["이차방정식 풀이", "이차함수의 x절편", "대수식 변형 능력"]}
+      ]},
+      { keys:["이차방정식","근의공식","완전제곱"], title:"이차방정식", grade:"중3 · 문자와 식", branches:[
+        {head:"교과서 핵심", bullets:["x²항을 포함하는 방정식", "해는 방정식을 참이 되게 하는 값", "인수분해와 제곱근으로 풀이"]},
+        {head:"주요 용어", bullets:["이차방정식, 해, 근", "인수분해, 완전제곱식", "중근과 서로 다른 두 근"]},
+        {head:"풀이 절차", bullets:["0이 되도록 정리", "인수분해 가능성 확인", "각 인수를 0으로 두어 해 구하기"]},
+        {head:"대표 예시", bullets:["넓이, 낙하, 수의 관계 문제", "x²-5x+6=0", "그래프의 x절편과 연결"]},
+        {head:"오개념 점검", bullets:["우변을 0으로 정리", "제곱근을 취할 때 ± 확인", "구한 해를 원래 식에 대입"]},
+        {head:"연결 단원", bullets:["인수분해", "이차함수", "고등학교 방정식 학습"]}
+      ]},
+      { keys:["이차함수","포물선","꼭짓점","축"], title:"이차함수", grade:"중3 · 함수", branches:[
+        {head:"교과서 핵심", bullets:["y=ax² 형태에서 시작", "그래프는 포물선 모양", "a의 부호와 크기로 모양 해석"]},
+        {head:"주요 용어", bullets:["포물선, 축, 꼭짓점", "최댓값과 최솟값", "평행이동"]},
+        {head:"그래프 절차", bullets:["꼭짓점과 축 확인", "대칭인 점을 표로 찾기", "부드러운 포물선으로 연결"]},
+        {head:"대표 예시", bullets:["공의 높이, 넓이의 변화", "y=x², y=-2x²", "표와 그래프의 대응"]},
+        {head:"오개념 점검", bullets:["a가 음수이면 아래로 열림", "그래프는 직선이 아니라 곡선", "대칭축 기준으로 점이 짝을 이룸"]},
+        {head:"연결 단원", bullets:["이차방정식의 해", "함수의 변화율 직관", "고등학교 이차함수 심화"]}
+      ]},
+      { keys:["확률","경우의수","사건"], title:"확률", grade:"중2 · 확률과 통계", branches:[
+        {head:"교과서 핵심", bullets:["일어날 가능성을 수로 나타냄", "전체 경우 중 원하는 경우의 비율", "0 이상 1 이하의 값"]},
+        {head:"주요 용어", bullets:["사건, 표본공간, 경우의 수", "확률, 여사건", "공정한 실험"]},
+        {head:"계산 절차", bullets:["전체 경우의 수를 먼저 구함", "조건을 만족하는 경우를 셈", "원하는 경우/전체 경우"]},
+        {head:"대표 예시", bullets:["동전, 주사위, 카드 뽑기", "두 자리 수 만들기", "생활 속 가능성 비교"]},
+        {head:"오개념 점검", bullets:["모든 경우가 같은 가능성인지 확인", "중복 계산을 피하기", "확률은 경우의 수 자체가 아님"]},
+        {head:"연결 단원", bullets:["자료의 정리와 해석", "통계적 판단", "고등학교 확률의 기초"]}
+      ]},
+      { keys:["통계","자료","평균","중앙값","최빈값","산포도"], title:"자료의 정리와 해석", grade:"중1~중3 · 확률과 통계", branches:[
+        {head:"교과서 핵심", bullets:["자료를 표와 그래프로 정리", "대표값으로 자료의 중심 파악", "산포도로 흩어진 정도 해석"]},
+        {head:"주요 용어", bullets:["평균, 중앙값, 최빈값", "도수분포표, 히스토그램", "분산, 표준편차"]},
+        {head:"해석 절차", bullets:["자료의 종류와 단위 확인", "적절한 표나 그래프 선택", "대표값과 산포도를 함께 비교"]},
+        {head:"대표 예시", bullets:["성적, 키, 설문 결과", "학급 자료 비교", "그래프에서 경향 읽기"]},
+        {head:"오개념 점검", bullets:["평균만으로 전체 판단하지 않기", "그래프 축의 간격 확인", "이상값의 영향 파악"]},
+        {head:"연결 단원", bullets:["확률", "자료 기반 의사결정", "고등학교 통계 학습"]}
+      ]}
+    ];
+
+    function makeGenericMindmap(topic) {
+      return { title: topic || "수학 개념", grade: "중학교 수학 · 교과서 개념 정리", branches: [
+        { head:"교과서 핵심", bullets:["정의와 의미를 먼저 한 문장으로 정리", "그 개념이 필요한 상황을 확인", "그림·표·식 중 적절한 표현으로 연결"] },
+        { head:"주요 용어", bullets:["단원에서 반복되는 핵심 용어 표시", "비슷한 용어의 차이를 구분", "기호가 있다면 뜻을 함께 기록"] },
+        { head:"공식·절차", bullets:["조건을 확인한 뒤 공식 적용", "계산 순서를 단계별로 정리", "마지막에 단위와 답의 의미 확인"] },
+        { head:"대표 예시", bullets:["교과서 기본 문제 한 가지 선정", "실생활 맥락과 연결", "숫자를 단순하게 바꿔 다시 확인"] },
+        { head:"오개념 점검", bullets:["부호, 괄호, 단위, 조건 확인", "항상 성립하는지 예외 점검", "풀이 후 원래 문제에 대입해 검산"] },
+        { head:"연결 단원", bullets:["이전 학년의 기초 개념과 연결", "다음 단원의 식·그래프·도형으로 확장", "설명하기 좋은 질문을 하나 만들기"] }
+      ]};
+    }
+
+    function getMindmapContent(topic) {
+      const q = String(topic || "").toLowerCase().replace(/\s+/g, "");
+      return middleMathMindmapBank.find((item) => item.keys.some((key) => q.includes(String(key).toLowerCase().replace(/\s+/g, "")))) || makeGenericMindmap(topic);
+    }
+
+    function drawLine(from, to) {
+      ctx.beginPath(); ctx.moveTo(from.x, from.y);
+      const midX = (from.x + to.x) / 2;
+      ctx.bezierCurveTo(midX, from.y, midX, to.y, to.x, to.y);
+      ctx.stroke();
+    }
+
+    function drawCard(card, x, y, w, h, index) {
+      ctx.save(); ctx.shadowColor = "rgba(92,126,148,0.10)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8;
+      roundRect(x, y, w, h, 28); ctx.fillStyle = "rgba(255,255,255,0.96)"; ctx.fill(); ctx.restore();
+      ctx.strokeStyle = index % 2 === 0 ? "#bfe4f5" : "#d9edf8"; ctx.lineWidth = 3; roundRect(x, y, w, h, 28); ctx.stroke();
+      ctx.fillStyle = "#4d9cc5"; ctx.font = "850 22px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(card.head, x + 24, y + 20);
+      ctx.fillStyle = "#5f7080"; ctx.font = "650 18px Apple SD Gothic Neo, Noto Sans KR, sans-serif";
+      let cy = y + 60;
+      card.bullets.slice(0, 3).forEach((bullet) => {
+        const lines = wrapText("• " + bullet, 25, 2);
+        lines.forEach((line) => { ctx.fillText(line, x + 24, cy); cy += 24; });
+        cy += 6;
+      });
+    }
+
+    function drawCenter(content, topic) {
+      const x = 485, y = 350, w = 430, h = 170;
+      ctx.save(); ctx.shadowColor = "rgba(46,98,130,0.16)"; ctx.shadowBlur = 22; ctx.shadowOffsetY = 10;
+      roundRect(x, y, w, h, 34); ctx.fillStyle = "#6f879a"; ctx.fill(); ctx.restore();
+      ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 3; roundRect(x, y, w, h, 34); ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,0.82)"; ctx.font = "750 19px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText(content.grade, x + w / 2, y + 28);
+      ctx.fillStyle = "#ffffff"; ctx.font = "900 38px Apple SD Gothic Neo, Noto Sans KR, sans-serif";
+      wrapText(content.title || topic, 14, 2).forEach((line, i) => ctx.fillText(line, x + w / 2, y + 66 + i * 46));
     }
 
     function drawMindmap(topic) {
       const t = topic || "수학 개념";
+      const content = getMindmapContent(t);
       ctx.clearRect(0, 0, mindCanvas.width, mindCanvas.height);
       const grad = ctx.createLinearGradient(0, 0, mindCanvas.width, mindCanvas.height);
-      grad.addColorStop(0, "#f7fbff"); grad.addColorStop(1, "#edf7fc");
+      grad.addColorStop(0, "#f7fbff"); grad.addColorStop(0.58, "#eef8fd"); grad.addColorStop(1, "#e7f4fb");
       ctx.fillStyle = grad; ctx.fillRect(0, 0, mindCanvas.width, mindCanvas.height);
-      ctx.fillStyle = "#5ea7cf"; ctx.font = "800 26px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "left"; ctx.fillText("심해수학 개념 마인드맵", 56, 62);
-      ctx.fillStyle = "#a3b2c1"; ctx.font = "600 18px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.fillText("주제에서 핵심 개념 → 계산 절차 → 대표 예시 → 자주 하는 실수로 확장", 56, 92);
-      const center = {x: 460, y: 295, w: 280, h: 128};
-      const nodes = [
-        {text: "핵심 개념", x: 88, y: 170, w: 245, h: 94},
-        {text: "공식 · 규칙", x: 850, y: 170, w: 245, h: 94},
-        {text: "대표 예시", x: 88, y: 448, w: 245, h: 94},
-        {text: "주의할 점", x: 850, y: 448, w: 245, h: 94},
-        {text: "수업 질문", x: 478, y: 596, w: 245, h: 94},
-      ];
-      ctx.strokeStyle = "#98c9e5"; ctx.lineWidth = 4;
-      nodes.forEach((n) => {
-        ctx.beginPath(); ctx.moveTo(center.x + center.w / 2, center.y + center.h / 2); ctx.lineTo(n.x + n.w / 2, n.y + n.h / 2); ctx.stroke();
-      });
-      drawTextBox(t, center.x, center.y, center.w, center.h, 30, 850);
-      nodes.forEach((n) => drawTextBox(n.text, n.x, n.y, n.w, n.h, 23, 800));
-      const subtexts = [
-        "정의와 의미를 한 문장으로 정리",
-        "계산 순서와 조건을 분리",
-        "간단한 수치로 먼저 확인",
-        "부호·괄호·단위 확인",
-        "왜 그렇게 되는지 설명하기"
-      ];
-      ctx.fillStyle = "#7c8a99"; ctx.font = "600 17px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "center";
-      nodes.forEach((n, i) => ctx.fillText(subtexts[i], n.x + n.w / 2, n.y + n.h + 34));
+      ctx.fillStyle = "#5ea7cf"; ctx.font = "900 31px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText("심해수학 중학교 개념 마인드맵", 56, 46);
+      ctx.fillStyle = "#7c8a99"; ctx.font = "650 18px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.fillText("교과서 흐름: 도입 → 정의 → 성질·공식 → 대표 예시 → 오개념 → 연결 단원", 56, 88);
+      const center = { x: 700, y: 435 };
+      const cards = [ {x:70,y:150,w:370,h:195}, {x:515,y:125,w:370,h:195}, {x:960,y:150,w:370,h:195}, {x:70,y:585,w:370,h:195}, {x:515,y:640,w:370,h:195}, {x:960,y:585,w:370,h:195} ];
+      ctx.strokeStyle = "rgba(127,184,217,0.62)"; ctx.lineWidth = 5; ctx.lineCap = "round";
+      cards.forEach((box) => drawLine(center, { x: box.x + box.w / 2, y: box.y + box.h / 2 }));
+      content.branches.forEach((branch, i) => drawCard(branch, cards[i].x, cards[i].y, cards[i].w, cards[i].h, i));
+      drawCenter(content, t);
+      ctx.fillStyle = "rgba(124,138,153,0.82)"; ctx.font = "600 15px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "right"; ctx.fillText("입력 주제: " + t, 1340, 858);
     }
 
     function makePrompt() {
       const topic = mindTopic.value.trim() || "수학 개념";
-      return `[심해수학 마인드맵 요청]
+      return `[심해수학 중학교 수학 마인드맵 제작 요청]
+
 주제: ${topic}
-중학생 수준에 맞게 핵심 개념, 공식과 규칙, 대표 예시, 자주 하는 실수, 수업 질문으로 나누어 마인드맵 형태로 정리해줘. 출력은 한눈에 보기 좋게 짧은 문장 중심으로 구성해줘.`;
+
+역할:
+너는 중학교 수학 교과서 내용을 잘 아는 수학 교사야. 학생이 개념의 구조를 한눈에 이해할 수 있도록 마인드맵을 만들어줘.
+
+작성 기준:
+1. 반드시 중학교 1~3학년 수학 교육과정 수준에서 설명한다.
+2. 교과서 전개 흐름을 따른다: 도입 맥락 → 정의 → 성질/공식 → 대표 예시 → 자주 하는 실수 → 연결 단원.
+3. 어려운 고등학교 개념이나 지나치게 추상적인 설명은 제외한다.
+4. 각 가지는 짧고 명확한 문장 2~3개로 정리한다.
+5. 학생이 바로 필기할 수 있도록 용어는 정확하게, 표현은 쉽게 쓴다.
+6. 마지막에는 '확인 질문' 3개를 만들어 개념 이해를 점검한다.
+
+출력 형식:
+- 중심 키워드: ${topic}
+- 1가지: 교과서 핵심
+- 2가지: 꼭 알아야 할 용어
+- 3가지: 공식·성질·풀이 절차
+- 4가지: 대표 예시 또는 실생활 맥락
+- 5가지: 자주 하는 실수와 점검법
+- 6가지: 연결되는 이전·다음 단원
+- 확인 질문 3개
+
+가능하면 마인드맵 형태로 들여쓰기해서 보여줘.`;
     }
     async function copyPrompt() {
       try { await navigator.clipboard.writeText(makePrompt()); } catch (e) { /* clipboard may be blocked */ }
