@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>심해수학 LAB</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --bg-soft: #edf7fc;
+      --card: rgba(255, 255, 255, 0.86);
+      --line: #d9edf8;
+      --text: #334155;
+      --muted: #7c8a99;
+      --muted2: #a3b2c1;
+      --bluegray: #6f879a;
+      --bluegray-dark: #61798d;
+      --accent: #7fb8d9;
+      --white: #ffffff;
+      --shadow: 0 14px 36px rgba(92, 126, 148, 0.12);
+      --shadow-soft: 0 8px 20px rgba(92, 126, 148, 0.08);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top left, #dff3ff 0, #f7fbff 34%, #ffffff 100%);
+      line-height: 1.55;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input { font-family: inherit; }
+
+    .page { min-height: 100vh; background: rgba(247, 251, 255, 0.58); }
+    .container { width: min(1120px, calc(100% - 36px)); margin: 0 auto; }
+
+    header { padding: 22px 0 18px; }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 225px; }
+    .logo-mark {
+      width: 50px; height: 50px; border-radius: 999px; display: grid; place-items: center;
+      color: white; background: linear-gradient(135deg, #b7e5fb, #98c9e5 52%, #a8b8c8);
+      box-shadow: var(--shadow-soft); border: 1px solid rgba(255,255,255,.9); overflow: hidden; flex: 0 0 auto;
+    }
+    .logo-mark svg { width: 28px; height: 28px; }
+    .brand-title { margin: 0; font-size: 20px; line-height: 1.1; font-weight: 750; letter-spacing: -0.02em; }
+    .brand-subtitle { margin: 4px 0 0; color: var(--muted2); font-size: 12px; letter-spacing: 0.04em; }
+
+    .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+    .nav {
+      display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px;
+      background: rgba(255,255,255,.72); border: 1px solid #dceff8; box-shadow: var(--shadow-soft);
+    }
+    .nav button {
+      border: 0; cursor: pointer; padding: 9px 16px; border-radius: 999px; color: #5f7080;
+      background: transparent; font-size: 14px; transition: .18s ease; white-space: nowrap;
+    }
+    .nav button:hover { background: #eef7fc; }
+    .nav button.active { color: white; background: var(--bluegray); box-shadow: 0 6px 16px rgba(111,135,154,.24); }
+
+    .timer-launch {
+      border: 1px solid #dceff8; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-radius: 999px; background: rgba(255,255,255,.82); color: #5f7080;
+      box-shadow: var(--shadow-soft); font-size: 13px; font-weight: 850; white-space: nowrap; transition: .18s ease;
+    }
+    .timer-launch strong { color: #334155; font-variant-numeric: tabular-nums; }
+    .timer-launch em { color: #5ea7cf; font-style: normal; font-size: 11px; }
+    .timer-launch:hover, .timer-launch.active { background: var(--bluegray); border-color: var(--bluegray); color: white; transform: translateY(-1px); }
+    .timer-launch:hover strong, .timer-launch.active strong, .timer-launch:hover em, .timer-launch.active em { color: white; }
+    .timer-box {
+      display: none; width: 224px; padding: 9px 10px 10px; border-radius: 22px; background: rgba(255,255,255,.82);
+      border: 1px solid #dceff8; box-shadow: var(--shadow-soft); backdrop-filter: blur(14px);
+    }
+    .timer-box.show { display: block; }
+    .timer-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .timer-title { color: #5ea7cf; font-size: 12px; font-weight: 850; white-space: nowrap; }
+    .timer-time { font-variant-numeric: tabular-nums; font-size: 23px; font-weight: 850; color: #334155; line-height: 1; }
+    .timer-bar { height: 6px; border-radius: 999px; background: #edf7fc; overflow: hidden; margin: 8px 0 8px; border: 1px solid #dceff8; }
+    .timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #98c9e5, #7fb8d9, #6f879a); transition: width .25s ease; }
+    .timer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .timer-actions button {
+      border: 1px solid #dceff8; cursor: pointer; padding: 6px 4px; border-radius: 999px;
+      background: #f7fbff; color: #5f7080; font-size: 11px; font-weight: 800; transition: .18s ease;
+    }
+    .timer-actions button:hover { background: #edf7fc; transform: translateY(-1px); }
+    .timer-actions .timer-primary { background: var(--bluegray); color: white; border-color: var(--bluegray); }
+
+    .hero-grid { display: grid; grid-template-columns: .82fr 1.18fr; gap: 24px; padding: 22px 0 34px; }
+    .intro-card, .feature-card, .tab-card, .tool-card, .archive-card, .favorites-strip {
+      background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-soft); backdrop-filter: blur(14px);
+    }
+    .intro-card { border-radius: var(--radius-xl); padding: 30px; }
+    .brand-mini { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+    .mini-icon { width: 62px; height: 62px; border-radius: 22px; display: grid; place-items: center; background: #edf7fc; border: 1px solid #dceff8; color: #85bddc; }
+    .mini-icon svg { width: 34px; height: 34px; }
+    .eyebrow { margin: 0; color: #5ea7cf; font-weight: 650; font-size: 14px; }
+    .intro-title { margin: 0; font-size: clamp(34px, 5vw, 46px); line-height: 1.18; letter-spacing: -0.05em; color: #334155; font-weight: 780; }
+    .intro-desc { margin: 22px 0 0; color: var(--muted); font-size: 15px; line-height: 1.8; word-break: keep-all; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 26px; }
+    .stat { border-radius: 20px; padding: 15px 10px; text-align: center; background: #f4f9fc; border: 1px solid rgba(217,237,248,.9); }
+    .stat strong { display: block; font-size: 18px; color: #334155; }
+    .stat span { display: block; margin-top: 4px; font-size: 12px; color: var(--muted2); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+    .chip { display: inline-flex; align-items: center; padding: 7px 12px; border-radius: 999px; color: #5f7080; background: white; border: 1px solid #dceff8; box-shadow: 0 4px 10px rgba(92,126,148,.06); font-size: 12px; font-weight: 650; }
+
+    .main-area { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .feature-card { display: none; border-radius: var(--radius-xl); padding: 26px; }
+    .feature-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
+    .badge { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; background: #edf7fc; color: #4d9cc5; font-size: 12px; font-weight: 700; }
+    .badge svg { width: 14px; height: 14px; }
+    .feature-title { margin: 14px 0 0; font-size: clamp(30px, 4vw, 42px); line-height: 1.18; letter-spacing: -0.04em; }
+    .feature-desc { margin: 12px 0 0; color: var(--muted); font-size: 14px; word-break: keep-all; }
+    .primary-btn {
+      border: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 120px;
+      padding: 13px 18px; border-radius: 18px; color: white; background: var(--bluegray); box-shadow: 0 10px 20px rgba(111,135,154,.24); font-size: 14px; font-weight: 700; transition: .18s ease; white-space: nowrap;
+    }
+    .primary-btn:hover { background: var(--bluegray-dark); transform: translateY(-1px); }
+
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .tab-card { border-radius: 27px; padding: 20px; cursor: pointer; transition: .18s ease; text-align: left; border-color: #dceff8; }
+    .tab-card:hover { transform: translateY(-1px); background: white; }
+    .tab-card.active { background: white; border-color: #bfe4f5; box-shadow: var(--shadow); }
+    .tab-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .tab-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .tab-icon { width: 46px; height: 46px; border-radius: 18px; display: grid; place-items: center; color: #5ea7cf; background: #eef7fc; flex: 0 0 auto; }
+    .tab-icon svg { width: 23px; height: 23px; }
+    .tab-card h3 { margin: 0; font-size: 16px; color: #334155; }
+    .tab-card p { margin: 4px 0 0; font-size: 12px; color: var(--muted2); }
+
+    .favorites-strip { display: none; align-items: center; gap: 12px; margin: 0 auto 18px; padding: 15px 16px; border-radius: 24px; position: relative; z-index: 5; }
+    .favorites-strip.show { display: flex; }
+    .favorite-label { min-width: fit-content; color: #5ea7cf; font-size: 13px; font-weight: 850; }
+    .favorite-chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+    .favorite-chip {
+      border: 1px solid #dceff8; cursor: pointer; padding: 8px 12px; border-radius: 999px;
+      background: #f7fbff; color: #5f7080; font-size: 12px; font-weight: 750; transition: .18s ease;
+    }
+    .favorite-chip:hover { background: var(--bluegray); color: white; border-color: var(--bluegray); transform: translateY(-1px); }
+
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin: 8px 0 18px; }
+    .section-label { margin: 0; color: #5ea7cf; font-size: 14px; font-weight: 750; display: flex; align-items: center; gap: 7px; }
+    .section-label svg { width: 16px; height: 16px; }
+    .section-title { margin: 4px 0 0; font-size: 25px; letter-spacing: -0.03em; }
+
+    .tools-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start; }
+    .tool-card { min-height: 225px; border-radius: 27px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: .18s ease; min-width: 0; }
+    .tool-card:hover { background: white; transform: translateY(-2px); box-shadow: var(--shadow); }
+    .tool-main { min-width: 0; }
+    .tool-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .tool-tag { padding: 5px 10px; border-radius: 999px; background: #edf7fc; color: #4d9cc5; font-size: 12px; font-weight: 750; white-space: nowrap; }
+    .tool-card h4 { margin: 0; font-size: 16px; line-height: 1.45; color: #334155; word-break: keep-all; overflow-wrap: anywhere; }
+    .tool-card p { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }
+    .tool-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eef6fb; }
+    .status { color: var(--muted2); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .link-btn { border: 1px solid #dceff8; cursor: pointer; padding: 7px 11px; border-radius: 999px; color: #5f7080; background: #f4f9fc; font-size: 12px; font-weight: 750; transition: .18s ease; white-space: nowrap; }
+    .link-btn:hover { background: #eaf4fa; color: #4d7f9e; }
+    .favorite-btn {
+      width: 34px; height: 34px; border: 1px solid #dceff8; cursor: pointer; border-radius: 999px;
+      background: #f7fbff; color: #b9c8d4; font-size: 17px; line-height: 1; display: grid; place-items: center; transition: .18s ease; flex: 0 0 auto;
+    }
+    .favorite-btn:hover { transform: translateY(-1px) scale(1.03); background: white; color: #7fb8d9; }
+    .favorite-btn.active { color: white; background: #7fb8d9; border-color: #7fb8d9; box-shadow: 0 8px 16px rgba(127,184,217,.26); }
+
+    .child-links { display: none; gap: 8px; margin-top: 16px; padding: 12px; border-radius: 18px; background: #f7fbff; border: 1px solid #dceff8; }
+    .tool-card.expanded .child-links { display: grid; }
+    .child-row {
+      display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 8px; min-width: 0;
+      padding: 10px; border-radius: 14px; background: white; border: 1px solid #e4f1f8;
+    }
+    .child-star { width: 28px; height: 28px; border-radius: 999px; border: 1px solid #dceff8; background: #f7fbff; color: #b9c8d4; cursor: pointer; font-size: 14px; }
+    .child-star.active { color: white; background: #7fb8d9; border-color: #7fb8d9; }
+    .child-name { font-size: 12px; font-weight: 800; color: #41576a; line-height: 1.35; word-break: keep-all; overflow-wrap: anywhere; }
+    .child-open { border: 0; cursor: pointer; padding: 7px 9px; border-radius: 999px; background: #edf7fc; color: #4d9cc5; font-size: 11px; font-weight: 850; white-space: nowrap; }
+
+    .archive-card { border-radius: var(--radius-xl); padding: 26px; margin: 34px 0 44px; }
+    .archive-title { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .archive-title-icon { width: 42px; height: 42px; border-radius: 17px; display: grid; place-items: center; color: #5ea7cf; background: #edf7fc; }
+    .archive-title h3 { margin: 0; font-size: 17px; }
+    .archive-title p { margin: 2px 0 0; color: var(--muted2); font-size: 13px; }
+    .archive-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .archive-item { border-radius: 22px; padding: 18px; background: #f7fbff; border: 1px solid rgba(217,237,248,.9); }
+    .archive-item svg { width: 22px; height: 22px; color: #5ea7cf; margin-bottom: 12px; }
+    .archive-item h4 { margin: 0; font-size: 15px; }
+    .archive-item p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; word-break: keep-all; }
+
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 40; padding: 22px; background: rgba(46, 62, 78, .28); backdrop-filter: blur(8px); overflow: auto; }
+    .modal-backdrop.show { display: grid; place-items: center; }
+    .modal { width: min(880px, 100%); background: rgba(255,255,255,.96); border: 1px solid #dceff8; border-radius: 30px; box-shadow: var(--shadow); padding: 22px; }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .modal-title { margin: 0; font-size: 22px; letter-spacing: -0.03em; }
+    .modal-desc { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; word-break: keep-all; }
+    .close-btn { width: 36px; height: 36px; border-radius: 999px; border: 1px solid #dceff8; background: #f7fbff; cursor: pointer; color: #5f7080; font-weight: 900; }
+    .mind-input-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 12px; }
+    .mind-input { width: 100%; border: 1px solid #dceff8; border-radius: 18px; background: #fff; color: #334155; padding: 13px 14px; outline: none; font-size: 14px; font-weight: 650; }
+    .mind-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .mind-btn { border: 1px solid #dceff8; cursor: pointer; padding: 10px 13px; border-radius: 999px; background: #f7fbff; color: #5f7080; font-size: 12px; font-weight: 850; }
+    .mind-btn.primary { background: var(--bluegray); color: white; border-color: var(--bluegray); }
+    .mind-canvas-wrap { width: 100%; overflow: auto; border: 1px solid #e4f1f8; border-radius: 22px; background: #f7fbff; padding: 10px; }
+    #mindCanvas { width: 100%; max-width: 820px; height: auto; display: block; margin: 0 auto; background: white; border-radius: 16px; }
+    .mind-note { margin: 12px 0 0; color: var(--muted2); font-size: 12px; line-height: 1.6; word-break: keep-all; }
+
+
+
+    .class-timer-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .class-timer-display {
+      padding: 22px 16px;
+      border-radius: 24px;
+      text-align: center;
+      background: linear-gradient(180deg, #f7fbff, #edf7fc);
+      border: 1px solid #dceff8;
+    }
+    .class-timer-display .timer-label {
+      display: block;
+      color: #5ea7cf;
+      font-size: 13px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+    .class-timer-display .timer-number {
+      display: block;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(44px, 8vw, 78px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: #334155;
+      font-weight: 900;
+    }
+    .class-timer-display .timer-status {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .class-timer-bar {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #edf7fc;
+      border: 1px solid #dceff8;
+    }
+    .class-timer-fill {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #a9d9f0, #7fb8d9, #6f879a);
+      transition: width 0.25s ease;
+    }
+    .class-timer-setting {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .class-timer-setting label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .class-timer-setting input {
+      width: 100%;
+      border: 1px solid #dceff8;
+      border-radius: 18px;
+      background: #fff;
+      color: #334155;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 16px;
+      font-weight: 850;
+    }
+    .class-timer-quick,
+    .class-timer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .class-timer-btn {
+      border: 1px solid #dceff8;
+      cursor: pointer;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #f7fbff;
+      color: #5f7080;
+      font-size: 12px;
+      font-weight: 850;
+      transition: .18s ease;
+    }
+    .class-timer-btn:hover {
+      background: #edf7fc;
+      transform: translateY(-1px);
+    }
+    .class-timer-btn.primary {
+      color: #fff;
+      background: var(--bluegray);
+      border-color: var(--bluegray);
+      box-shadow: 0 8px 18px rgba(111, 135, 154, 0.18);
+    }
+    .class-timer-btn.warning {
+      color: #4d9cc5;
+      background: #edf7fc;
+    }
+    @media (max-width: 640px) {
+      .class-timer-setting { grid-template-columns: 1fr; }
+      .class-timer-controls .class-timer-btn { flex: 1 1 auto; }
+    }
+
+    footer { border-top: 1px solid #dceff8; background: rgba(255,255,255,.62); color: var(--muted2); padding: 24px 0; text-align: center; font-size: 13px; }
+
+
+
+    /* 첫 화면: 왼쪽 브랜드 카드 + 오른쪽 LAB 선택/목록 */
+    .hero-grid { display: grid; grid-template-columns: .82fr 1.18fr; gap: 24px; padding: 22px 0 34px; align-items: start; }
+    .intro-card { display: block; }
+    .main-area { gap: 12px; min-width: 0; }
+    .tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tab-card { min-height: 110px; }
+    .main-area .favorites-strip { width: 100%; margin: 0 0 2px; padding: 14px 16px; }
+    .main-area .favorites-strip.show { display: flex; }
+    #tools { margin-top: 0; }
+    #tools .section-head { margin: 0 0 12px; }
+    .section-guide-mini { margin: 4px 0 0; color: var(--muted2); font-size: 12px; line-height: 1.5; word-break: keep-all; }
+
+    .tools-grid.lab-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      min-width: 0;
+      align-items: stretch;
+    }
+    .lab-lane {
+      min-width: 0;
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      background: rgba(255,255,255,0.66);
+      border: 1px solid #dceff8;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(14px);
+      transition: 0.18s ease;
+    }
+    .lab-lane.active-lane {
+      background: rgba(255,255,255,0.9);
+      border-color: #b7e5fb;
+      box-shadow: var(--shadow);
+    }
+    .lane-head {
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 16px;
+      border-radius: 23px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid #dceff8;
+      box-shadow: 0 8px 20px rgba(92, 126, 148, 0.07);
+    }
+    .lane-head-left { min-width: 0; }
+    .lane-kicker { margin: 0; color: #5ea7cf; font-size: 12px; font-weight: 850; letter-spacing: .02em; }
+    .lane-title { margin: 3px 0 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; color: #334155; }
+    .lane-desc { margin: 4px 0 0; color: var(--muted2); font-size: 12px; line-height: 1.45; word-break: keep-all; }
+    .lane-count {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #4d9cc5;
+      background: #edf7fc;
+      border: 1px solid #dceff8;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+    .lane-tools {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      height: min(520px, calc(100vh - 350px));
+      min-height: 330px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+    .lane-tools::-webkit-scrollbar { width: 8px; }
+    .lane-tools::-webkit-scrollbar-thumb { background: #cde5f2; border-radius: 999px; }
+    .lane-tools::-webkit-scrollbar-track { background: transparent; }
+    .lab-lane .tool-card { min-height: 0; padding: 17px; border-radius: 24px; }
+    .lab-lane .tool-card p { font-size: 12.5px; line-height: 1.62; }
+    .lab-lane .tool-bottom { margin-top: 14px; padding-top: 12px; }
+    .lab-lane .child-links { margin-top: 12px; }
+
+    @media (max-width: 1100px) { .tools-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .tools-grid.lab-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lane-tools { height: 460px; overflow-y: auto; } }
+    @media (max-width: 900px) {
+      .header-inner { align-items: flex-start; flex-direction: column; }
+      .header-right { width: 100%; justify-content: space-between; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .tools-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .archive-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .container { width: min(100% - 24px, 1120px); }
+      header { padding-top: 18px; }
+      .header-right { flex-direction: column; align-items: stretch; }
+      .nav { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); }
+      .nav button { width: 100%; }
+      .timer-launch, .timer-box { width: 100%; justify-content: center; }
+      .intro-card, .feature-card, .archive-card { border-radius: 26px; padding: 22px; }
+      .feature-head, .section-head, .favorites-strip { align-items: flex-start; flex-direction: column; }
+      .primary-btn { width: 100%; }
+      .tabs, .tools-grid, .tools-grid.lab-board { grid-template-columns: 1fr; }
+      .tool-card { min-height: 0; }
+      .child-row { grid-template-columns: 28px 1fr; }
+      .child-open { grid-column: 2; width: fit-content; }
+      .mind-input-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="container header-inner">
+        <a class="brand" href="#">
+          <div class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 13.5c2.3-2.2 4.8-2.2 7.2 0 2.4 2.2 5 2.2 7.6 0 .8-.7 1.6-1.1 2.2-1.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M3 8.5c2.3-2.2 4.8-2.2 7.2 0 2.4 2.2 5 2.2 7.6 0 .8-.7 1.6-1.1 2.2-1.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+              <path d="M6 18.5h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">심해수학 LAB</h1>
+            <p class="brand-subtitle">Deep Math · Smart Work · Personal Archive</p>
+          </div>
+        </a>
+        <div class="header-right">
+          <nav class="nav" aria-label="주요 영역">
+            <button class="active" type="button" data-tab="work">업무 LAB</button>
+            <button type="button" data-tab="math">수학 LAB</button>
+            <button type="button" data-tab="classroom">담임 LAB</button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="container hero-grid">
+        <aside class="intro-card">
+          <div class="brand-mini">
+            <div class="mini-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 13.5c2.3-2.2 4.8-2.2 7.2 0 2.4 2.2 5 2.2 7.6 0 .8-.7 1.6-1.1 2.2-1.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M3 8.5c2.3-2.2 4.8-2.2 7.2 0 2.4 2.2 5 2.2 7.6 0 .8-.7 1.6-1.1 2.2-1.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+              </svg>
+            </div>
+            <div>
+              <p class="eyebrow">My Brand Portal</p>
+              <h2 class="brand-title">심해수학 LAB</h2>
+            </div>
+          </div>
+          <h2 class="intro-title">수학은 깊게,<br />업무는 가볍게.</h2>
+          <p class="intro-desc">업무 LAB과 수학 LAB을 구분해 자주 쓰는 자료와 도구를 빠르게 여는 개인 브랜드형 아카이브입니다.</p>
+          <div class="stats">
+            <div class="stat"><strong>3</strong><span>영역</span></div>
+            <div class="stat"><strong id="toolCount">0</strong><span>도구</span></div>
+            <div class="stat"><strong>LAB</strong><span>브랜드</span></div>
+          </div>
+          <div class="chips">
+            <span class="chip">수업 자료</span><span class="chip">학생 활동</span><span class="chip">업무 도구</span><span class="chip">담임 운영</span><span class="chip">자동화</span><span class="chip">문서 작성</span><span class="chip">링크 모음</span>
+          </div>
+        </aside>
+        <div class="main-area">
+          <section class="feature-card">
+            <div class="feature-head">
+              <div>
+                <span class="badge">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                  Featured Space
+                </span>
+                <h2 class="feature-title" id="featureTitle">업무는 가볍게</h2>
+                <p class="feature-desc" id="featureDesc">업무 도구를 빠르게 찾고 연결하는 공간</p>
+              </div>
+              <a class="primary-btn" href="#tools">전체 보기 <span>›</span></a>
+            </div>
+          </section>
+
+          <section class="favorites-strip" id="favoritesStrip" aria-label="즐겨찾기 바로가기">
+            <div class="favorite-label">★ 즐겨찾기</div>
+            <div class="favorite-chips" id="favoriteChips"></div>
+          </section>
+
+          <section class="tabs" aria-label="LAB 선택">
+            <button class="tab-card active" type="button" data-tab="work">
+              <div class="tab-inner"><div class="tab-left"><div class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 7h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12h16" stroke="currentColor" stroke-width="2"/></svg></div><div><h3>업무 LAB</h3><p id="workCount">0 links</p></div></div><span>›</span></div>
+            </button>
+            <button class="tab-card" type="button" data-tab="math">
+              <div class="tab-inner"><div class="tab-left"><div class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H20v15H7.5A2.5 2.5 0 0 0 5 20.5v-15z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 5.5A2.5 2.5 0 0 0 2.5 3H2v15h.5A2.5 2.5 0 0 1 5 20.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><h3>수학 LAB</h3><p id="mathCount">0 tools</p></div></div><span>›</span></div>
+            </button>
+            <button class="tab-card" type="button" data-tab="classroom">
+              <div class="tab-inner"><div class="tab-left"><div class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 21v-6h6v6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><h3>담임 LAB</h3><p id="classroomCount">0 apps</p></div></div><span>›</span></div>
+            </button>
+          </section>
+
+          <section id="tools">
+            <div class="section-head">
+              <div>
+                <p class="section-label"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4V4zM13 4h7v7h-7V4zM4 13h7v7H4v-7zM13 13h7v7h-7v-7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>LAB Board</p>
+                <h3 class="section-title" id="toolSectionTitle">LAB별 바로가기</h3>
+                <p class="section-guide-mini" id="toolSectionDesc">업무, 수학, 담임 도구를 영역별로 스크롤하며 바로 실행할 수 있습니다.</p>
+              </div>
+            </div>
+            <div class="tools-grid" id="toolsGrid"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="container archive-card">
+        <div class="archive-title"><div class="archive-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4.5-8 4.5-8-4.5L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12l8 4.5 8-4.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 16.5l8 4.5 8-4.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><h3>Archive Structure</h3><p>앞으로 추가될 메뉴를 위한 기본 분류</p></div></div>
+        <div class="archive-grid">
+          <div class="archive-item"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l3 3v15H6V3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><h4>자료실</h4><p>PDF, 이미지, 활동지, 수업 자료를 정리</p></div>
+          <div class="archive-item"><svg viewBox="0 0 24 24" fill="none"><path d="M10.5 13.5l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 8l-2 2a4 4 0 0 0 5.7 5.7l2-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 16l2-2A4 4 0 0 0 11.3 8.3l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h4>링크 모음</h4><p>자주 쓰는 사이트와 외부 도구 연결</p></div>
+          <div class="archive-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 7h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><h4>업무 앱</h4><p>조회, 작성, 자동화 기능을 카드로 추가</p></div>
+        </div>
+      </section>
+    </main>
+    <footer><div class="container">심해수학 LAB · 업무, 수학, 담임 운영을 한곳에.</div></footer>
+  </div>
+
+  <div class="modal-backdrop" id="mindModal" role="dialog" aria-modal="true" aria-label="개념 마인드맵 만들기">
+    <div class="modal">
+      <div class="modal-head">
+        <div><h3 class="modal-title">개념 마인드맵 만들기</h3><p class="modal-desc">수학 주제를 입력하면 이미지형 마인드맵을 바로 만들 수 있고, NotebookLM으로 보낼 프롬프트도 복사됩니다.</p></div>
+        <button class="close-btn" type="button" id="mindClose">×</button>
+      </div>
+      <div class="mind-input-row">
+        <input class="mind-input" id="mindTopic" placeholder="예: 일차함수, 유리수의 사칙계산, 삼각비" />
+        <button class="mind-btn primary" type="button" id="mindCreate">이미지 만들기</button>
+      </div>
+      <div class="mind-actions">
+        <button class="mind-btn" type="button" id="mindNotebook">NotebookLM 열기</button>
+        <button class="mind-btn" type="button" id="mindCopy">프롬프트 복사</button>
+        <button class="mind-btn" type="button" id="mindDownload">PNG 저장</button>
+      </div>
+      <div class="mind-canvas-wrap"><canvas id="mindCanvas" width="1200" height="760"></canvas></div>
+      <p class="mind-note">NotebookLM은 새 창으로 열립니다. 자동 생성 프롬프트를 붙여 넣어 자료 정리와 확장에 활용하면 됩니다.</p>
+    </div>
+  </div>
+
+
+
+  <div class="modal-backdrop" id="classTimerModal" role="dialog" aria-modal="true" aria-label="수업 타이머 LAB">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h3 class="modal-title">수업 타이머 LAB</h3>
+          <p class="modal-desc">활동 시간, 발표 시간, 정리 시간을 직접 설정하고 시간이 끝나면 알림음으로 전환 시점을 안내합니다.</p>
+        </div>
+        <button class="close-btn" type="button" id="classTimerClose">×</button>
+      </div>
+
+      <div class="class-timer-card">
+        <div class="class-timer-display">
+          <span class="timer-label">남은 시간</span>
+          <span class="timer-number" id="classTimerDisplay">45:00</span>
+          <span class="timer-status" id="classTimerStatus">시간을 설정한 뒤 시작을 누르세요.</span>
+        </div>
+
+        <div class="class-timer-bar" aria-hidden="true">
+          <div class="class-timer-fill" id="classTimerFill"></div>
+        </div>
+
+        <div class="class-timer-setting">
+          <label>
+            시간 설정(분)
+            <input id="classTimerMinutes" type="number" min="1" max="180" value="45" inputmode="numeric" />
+          </label>
+          <button class="class-timer-btn primary" type="button" id="classTimerApply">시간 적용</button>
+        </div>
+
+        <div class="class-timer-quick" aria-label="빠른 시간 설정">
+          <button class="class-timer-btn" type="button" data-min="5">5분</button>
+          <button class="class-timer-btn" type="button" data-min="10">10분</button>
+          <button class="class-timer-btn" type="button" data-min="15">15분</button>
+          <button class="class-timer-btn" type="button" data-min="30">30분</button>
+          <button class="class-timer-btn" type="button" data-min="45">45분</button>
+        </div>
+
+        <div class="class-timer-controls">
+          <button class="class-timer-btn primary" type="button" id="classTimerStart">시작</button>
+          <button class="class-timer-btn" type="button" id="classTimerPause">일시정지</button>
+          <button class="class-timer-btn" type="button" id="classTimerReset">리셋</button>
+          <button class="class-timer-btn warning" type="button" id="classTimerTest">종료음 테스트</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = {
+  "math": {
+    "title": "수학 LAB",
+    "desc": "강의, 연산 앱, 개념 정리 자료를 학습 흐름에 맞게 정돈한 수업 공간",
+    "sectionTitle": "수학 LAB 바로가기",
+    "tools": [
+      {
+        "id": "math-youtube-room",
+        "title": "심해 강의실",
+        "desc": "단원 도입이나 보충 설명이 필요할 때 학년별 재생목록을 빠르게 연결합니다.",
+        "tag": "유튜브",
+        "status": "강의실",
+        "action": "강의 선택",
+        "url": "#",
+        "children": [
+          {
+            "title": "채널 열기",
+            "url": "https://www.youtube.com/@Deep_sea_MATH",
+            "action": "채널"
+          },
+          {
+            "title": "[중1] 수와 연산 재생목록",
+            "url": "https://www.youtube.com/playlist?list=PLQ8GKYDe-TGB_ED5Ldp4D_eKyoZmXNNSH",
+            "action": "강의"
+          },
+          {
+            "title": "[중2] 수와 식의 계산 재생목록",
+            "url": "https://www.youtube.com/playlist?list=PLQ8GKYDe-TGDYod5YdEfb3EbMn84xoDst",
+            "action": "강의"
+          },
+          {
+            "title": "[중3] 삼각비 재생목록",
+            "url": "https://www.youtube.com/playlist?list=PLQ8GKYDe-TGDOWgZGzkh_zNk4wF2gAYgs",
+            "action": "강의"
+          }
+        ]
+      },
+      {
+        "id": "math-game-lab",
+        "title": "수학 게임 LAB",
+        "desc": "연산 감각을 짧게 점검하고 반복 연습으로 이어가는 수업용 앱 모음입니다.",
+        "tag": "웹앱",
+        "status": "앱 모음",
+        "action": "게임 선택",
+        "url": "#",
+        "children": [
+          {
+            "title": "[중1] 유리수 연산 퀴즈",
+            "url": "https://deepseamath1.netlify.app/",
+            "action": "앱 열기"
+          }
+        ]
+      },
+      {
+        "id": "math-worksheet",
+        "title": "수학 활동지 자료실",
+        "desc": "활동지와 인쇄 자료를 단원별로 모아 수업 전 준비 시간을 줄입니다.",
+        "tag": "자료",
+        "status": "준비중",
+        "url": "#"
+      },
+      {
+        "id": "math-mindmap",
+        "title": "개념 마인드맵",
+        "desc": "주제를 입력해 핵심 구조를 이미지로 정리하고 NotebookLM 탐구로 확장합니다.",
+        "tag": "마인드맵",
+        "status": "즉시 제작",
+        "action": "주제 입력",
+        "url": "#",
+        "special": "mindmap"
+      },
+      {
+        "id": "math-class-timer",
+        "title": "수업 타이머 LAB",
+        "desc": "활동 시간과 발표 시간을 정해 수업 흐름을 차분하게 전환하는 시간 관리 앱입니다.",
+        "tag": "타이머",
+        "status": "웹앱",
+        "action": "타이머 열기",
+        "url": "#",
+        "special": "classTimer"
+      },
+      {
+        "id": "math-random-tool",
+        "title": "수업용 랜덤 도구",
+        "desc": "발표 순서와 미션을 즉시 뽑아 활동의 리듬을 가볍게 만듭니다.",
+        "tag": "수업",
+        "status": "준비중",
+        "url": "#"
+      }
+    ]
+  },
+  "work": {
+    "title": "업무 LAB",
+    "desc": "문서, 수업 운영, AI 보조 도구를 업무 흐름에 맞게 정리한 실행 공간",
+    "sectionTitle": "업무 LAB 바로가기",
+    "tools": [
+      {
+        "title": "학생 코드 조회",
+        "desc": "학생별 확인 정보를 빠르게 조회하여 안내와 자료 배부의 혼선을 줄입니다.",
+        "tag": "조회",
+        "status": "우선 제작",
+        "url": "#",
+        "id": "work-01"
+      },
+      {
+        "title": "비밀번호 조회",
+        "desc": "반별 비밀번호를 안전하게 확인해 개별 안내 상황에서 바로 활용합니다.",
+        "tag": "조회",
+        "status": "우선 제작",
+        "url": "#",
+        "id": "work-02"
+      },
+      {
+        "title": "문장 정리 도우미",
+        "desc": "생활기록부·안내문·상담 기록을 공문서 어투로 다듬는 작성 보조 공간입니다.",
+        "tag": "작성",
+        "status": "준비중",
+        "url": "#",
+        "id": "work-03"
+      },
+      {
+        "title": "업무 자동화 모음",
+        "desc": "반복 확인, 파일 정리, 알림 업무를 자동화 도구로 연결하는 작업실입니다.",
+        "tag": "자동화",
+        "status": "준비중",
+        "url": "#",
+        "id": "work-04"
+      },
+      {
+        "title": "Wrks AI",
+        "desc": "교육 현장의 문서 초안, 아이디어 정리, 표현 다듬기에 활용하기 좋습니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://www.wrks.ai/ko/chat",
+        "id": "work-05"
+      },
+      {
+        "title": "교원 업무지원서식모음",
+        "desc": "필요 서식을 빠르게 확인해 공문 작성과 행정 처리 시간을 줄입니다.",
+        "tag": "서식",
+        "status": "웹사이트",
+        "url": "https://sites.google.com/senedu.kr/support",
+        "id": "work-06"
+      },
+      {
+        "title": "Brave",
+        "desc": "자료 검색 시 광고 노출을 줄이고 안정적인 웹 탐색 환경을 마련합니다.",
+        "tag": "브라우저",
+        "status": "웹사이트",
+        "url": "https://brave.com/ko/download/",
+        "id": "work-07"
+      },
+      {
+        "title": "Snipaste",
+        "desc": "화면 일부를 고정해 설명 자료와 비교 확인 작업을 깔끔하게 진행합니다.",
+        "tag": "캡처",
+        "status": "웹사이트",
+        "url": "https://www.snipaste.com/",
+        "id": "work-08"
+      },
+      {
+        "title": "ZoomIt",
+        "desc": "화면 확대와 판서 표시로 온라인 자료 설명의 집중도를 높입니다.",
+        "tag": "수업",
+        "status": "웹사이트",
+        "url": "https://learn.microsoft.com/ko-kr/sysinternals/downloads/zoomit",
+        "id": "work-09"
+      },
+      {
+        "title": "스팟 마우스",
+        "desc": "마우스 위치를 또렷하게 보여 수업 시 학생 시선을 자연스럽게 안내합니다.",
+        "tag": "수업",
+        "status": "웹사이트",
+        "url": "https://kinfolksoft.com/%EC%8A%A4%ED%8C%9F-%EB%A7%88%EC%9A%B0%EC%8A%A4/",
+        "id": "work-10"
+      },
+      {
+        "title": "Canva",
+        "desc": "안내문, 포스터, 카드뉴스를 빠르게 정리해 보기 좋은 자료로 제작합니다.",
+        "tag": "디자인",
+        "status": "웹사이트",
+        "url": "https://www.canva.com/",
+        "id": "work-11"
+      },
+      {
+        "title": "Napkin AI",
+        "desc": "텍스트 설명을 흐름도와 구조도로 바꾸어 개념 설명 자료 제작에 활용합니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://www.napkin.ai/",
+        "id": "work-12"
+      },
+      {
+        "title": "NotebookLM",
+        "desc": "업로드한 자료를 바탕으로 요약, 질문, 학습 흐름 정리에 활용합니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://notebooklm.google.com/",
+        "id": "work-13"
+      },
+      {
+        "title": "Snorkl",
+        "desc": "학생의 말하기 설명을 피드백 자료로 삼아 사고 과정을 점검합니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://snorkl.app/",
+        "id": "work-14"
+      },
+      {
+        "title": "Questbook",
+        "desc": "수업 콘텐츠 초안을 구성하고 활동 아이디어를 정리할 때 활용합니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://www.questbook.io/",
+        "id": "work-15"
+      },
+      {
+        "title": "KAMI",
+        "desc": "PDF 위에 필기와 주석을 남겨 과제 피드백과 수업 자료 점검에 적합합니다.",
+        "tag": "PDF",
+        "status": "웹사이트",
+        "url": "https://www.kamiapp.com/",
+        "id": "work-16"
+      },
+      {
+        "title": "123apps",
+        "desc": "파일 변환, 영상·음성 편집 등 작은 디지털 작업을 한곳에서 처리합니다.",
+        "tag": "변환",
+        "status": "웹사이트",
+        "url": "https://123apps.com/ko/",
+        "id": "work-17"
+      },
+      {
+        "title": "Brisk Teaching",
+        "desc": "웹 자료를 수업용 설명, 퀴즈, 피드백 초안으로 빠르게 전환합니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://www.briskteaching.com/ko",
+        "id": "work-18"
+      },
+      {
+        "title": "AI 마음일기",
+        "desc": "학생 정서 기록을 살펴 생활교육 상담의 기초 자료로 활용합니다.",
+        "tag": "생활교육",
+        "status": "웹사이트",
+        "url": "https://dsen.seamspace.me/",
+        "id": "work-19"
+      },
+      {
+        "title": "Google AI Studio",
+        "desc": "AI 프롬프트와 Gemini 기능을 시험하며 수업·업무 자동화 가능성을 확인합니다.",
+        "tag": "AI",
+        "status": "웹사이트",
+        "url": "https://ai.google.dev/aistudio?hl=ko",
+        "id": "work-20"
+      },
+      {
+        "title": "Gamma",
+        "desc": "짧은 입력으로 발표 자료 초안을 만들고 연수·수업 안내 흐름을 잡습니다.",
+        "tag": "발표",
+        "status": "웹사이트",
+        "url": "https://gamma.app/",
+        "id": "work-21"
+      },
+      {
+        "title": "Felo AI",
+        "desc": "검색 결과를 구조화해 조사, 비교, 발표 자료 기획에 활용합니다.",
+        "tag": "검색",
+        "status": "웹사이트",
+        "url": "https://felo.ai/search",
+        "id": "work-22"
+      },
+      {
+        "title": "Perplexity",
+        "desc": "근거가 필요한 자료 검색과 빠른 개요 파악에 적합한 AI 검색 공간입니다.",
+        "tag": "검색",
+        "status": "웹사이트",
+        "url": "https://www.perplexity.ai/",
+        "id": "work-23"
+      },
+      {
+        "title": "Mizou",
+        "desc": "학생 질문을 안내하는 교육용 챗봇을 만들어 개별 학습 지원에 활용합니다.",
+        "tag": "챗봇",
+        "status": "웹사이트",
+        "url": "https://mizou.com/",
+        "id": "work-24"
+      },
+      {
+        "title": "Suno",
+        "desc": "짧은 노래나 배경음악을 만들어 수업 도입과 활동 분위기 조성에 활용합니다.",
+        "tag": "음악",
+        "status": "웹사이트",
+        "url": "https://suno.com/",
+        "id": "work-25"
+      },
+      {
+        "title": "학급관계분석",
+        "desc": "학급 관계 흐름을 시각적으로 살펴 상담과 자리 배치 참고 자료로 활용합니다.",
+        "tag": "학급",
+        "status": "웹사이트",
+        "url": "https://class-sna.streamlit.app/",
+        "id": "work-26"
+      },
+      {
+        "title": "Diffit",
+        "desc": "같은 주제를 수준별 학습 자료로 변환해 맞춤형 활동지를 준비합니다.",
+        "tag": "학습지",
+        "status": "웹사이트",
+        "url": "https://app.diffit.me/",
+        "id": "work-27"
+      },
+      {
+        "title": "Class Tool hub",
+        "desc": "퀴즈, 자리배치, 타이머 등 수업 운영 도구를 한곳에서 연결합니다.",
+        "tag": "수업도구",
+        "status": "링크",
+        "url": "https://docs.google.com/",
+        "id": "work-28"
+      },
+      {
+        "title": "과세특/행발 GEMINI",
+        "desc": "관찰 기록과 활동 내용을 바탕으로 생활기록부 초안 정리에 활용합니다.",
+        "tag": "생기부",
+        "status": "링크",
+        "url": "https://docs.google.com/",
+        "id": "work-29"
+      },
+      {
+        "title": "생기부 초안 작성기",
+        "desc": "자율·세특·행발 문장 초안을 정돈해 기록 업무의 흐름을 잡습니다.",
+        "tag": "생기부",
+        "status": "웹사이트",
+        "url": "https://futuristic-haddock-b65.notion.site/",
+        "id": "work-30"
+      },
+      {
+        "title": "모둠배치",
+        "desc": "조건을 고려한 모둠 구성을 준비하고 협력 활동 설계에 참고합니다.",
+        "tag": "모둠",
+        "status": "슬라이드",
+        "url": "https://docs.google.com/presentation/d/1-qd0sHNxXlq8GqWm7Crzc7ee5tXQ8mGpupUB9LESIgg/edit?usp=sharing",
+        "id": "work-31"
+      },
+      {
+        "title": "모둠활동",
+        "desc": "모둠별 진행 상황을 확인하여 활동 관리와 피드백을 정돈합니다.",
+        "tag": "모둠",
+        "status": "링크",
+        "url": "https://docs.google.com/",
+        "id": "work-32"
+      },
+      {
+        "title": "응답확인웹앱",
+        "desc": "학생 응답을 빠르게 확인하고 정답·오답 처리 흐름을 간소화합니다.",
+        "tag": "평가",
+        "status": "슬라이드",
+        "url": "https://docs.google.com/presentation/d/1H8n3D7LDQUso8iYOCiw87yCGKykNc8BYa4KwCWHWfkg/edit?usp=sharing",
+        "id": "work-33"
+      },
+      {
+        "title": "서술형 웹앱",
+        "desc": "서술형 응답을 수집하고 평가 과정을 체계적으로 관리하는 데 활용합니다.",
+        "tag": "평가",
+        "status": "슬라이드",
+        "url": "https://docs.google.com/presentation/d/1vJPSgMKa4PFjxsVH4avgqodtLneu_7m-Ilue52sNazE/edit?usp=sharing",
+        "id": "work-34"
+      },
+      {
+        "title": "연수 페이지",
+        "desc": "연수 자료와 참여 안내를 한 화면에 모아 운영 흐름을 안정화합니다.",
+        "tag": "연수",
+        "status": "웹앱",
+        "url": "https://script.google.com/macros/s/AKfycbyqFkv8_2ve-WCMqHsw1pIrJiNCakSo8VRkRh_c5Fnz8MZApFJ7nUx54nI-CRbW192ZSQ/exec",
+        "id": "work-35"
+      },
+      {
+        "title": "gptable",
+        "desc": "업무·수업에 맞는 프롬프트 예시를 찾아 표현과 구조를 참고합니다.",
+        "tag": "프롬프트",
+        "status": "웹사이트",
+        "url": "https://gptable.net/",
+        "id": "work-36"
+      },
+      {
+        "title": "눈누",
+        "desc": "자료의 분위기에 맞는 한글 글꼴을 찾고 디자인 완성도를 높입니다.",
+        "tag": "폰트",
+        "status": "웹사이트",
+        "url": "https://noonnu.cc/index?category_use_ids=4&locale=ko&order_by=pd",
+        "id": "work-37"
+      },
+      {
+        "title": "Flaticon",
+        "desc": "카드뉴스, 안내문, 웹페이지에 어울리는 아이콘을 빠르게 확보합니다.",
+        "tag": "아이콘",
+        "status": "웹사이트",
+        "url": "https://www.flaticon.com/kr/",
+        "id": "work-38"
+      },
+      {
+        "title": "Shots",
+        "desc": "캡처 화면을 깔끔한 목업 이미지로 바꿔 설명 자료의 완성도를 높입니다.",
+        "tag": "목업",
+        "status": "웹사이트",
+        "url": "https://shots.so/",
+        "id": "work-39"
+      },
+      {
+        "title": "MagicPattern",
+        "desc": "배경 패턴과 장식 요소를 제작해 자료 디자인에 차분한 포인트를 더합니다.",
+        "tag": "디자인",
+        "status": "웹사이트",
+        "url": "https://www.magicpattern.design/",
+        "id": "work-40"
+      },
+      {
+        "title": "AskedTech",
+        "desc": "새로운 에듀테크 도구를 탐색하고 수업 적용 가능성을 검토합니다.",
+        "tag": "에듀테크",
+        "status": "웹사이트",
+        "url": "https://askedtech.com/home",
+        "id": "work-41"
+      },
+      {
+        "title": "배치네이머",
+        "desc": "다수의 파일명을 한 번에 정리해 제출물 관리와 자료 보관을 효율화합니다.",
+        "tag": "파일정리",
+        "status": "웹사이트",
+        "url": "https://blog.naver.com/darkwalk77/223082595848",
+        "id": "work-42"
+      },
+      {
+        "title": "Readdy AI",
+        "desc": "웹페이지 초안을 빠르게 구성해 프로젝트나 안내 페이지 제작에 활용합니다.",
+        "tag": "웹제작",
+        "status": "웹사이트",
+        "url": "https://readdy.ai/",
+        "id": "work-43"
+      },
+      {
+        "title": "Whisk AI",
+        "desc": "이미지를 생성·변형하며 수업 자료의 시각 요소를 실험합니다.",
+        "tag": "이미지",
+        "status": "웹사이트",
+        "url": "https://labs.google/fx/tools/whisk",
+        "id": "work-44"
+      }
+    ]
+  },
+  "classroom": {
+    "title": "담임 LAB",
+    "desc": "학급 운영, 자리 배치, 이벤트, 결과 조회를 담임 업무 흐름에 맞게 모아둔 공간",
+    "sectionTitle": "담임 LAB 바로가기",
+    "tools": [
+      {
+        "id": "class-seat",
+        "title": "자리 바꾸기 프로그램",
+        "desc": "학생 관계와 활동 조건을 반영해 좌석 배치 초안을 빠르게 준비하는 학급 운영 도구입니다.",
+        "tag": "자리배치",
+        "status": "웹앱 예정",
+        "action": "설계 보기",
+        "url": "#",
+        "children": [
+          {
+            "title": "자리배치 웹앱 제작 예정",
+            "url": "#",
+            "action": "준비중"
+          }
+        ]
+      },
+      {
+        "id": "class-group-organizer",
+        "title": "각종 소속 정리 프로그램",
+        "desc": "청소구역, 역할, 모둠, 동아리 등 학생 소속 정보를 한 화면에서 정리하는 관리 도구입니다.",
+        "tag": "소속정리",
+        "status": "웹앱 예정",
+        "action": "설계 보기",
+        "url": "#",
+        "children": [
+          {
+            "title": "소속 정리 웹앱 제작 예정",
+            "url": "#",
+            "action": "준비중"
+          }
+        ]
+      },
+      {
+        "id": "class-manitto",
+        "title": "[이벤트] 마니또",
+        "desc": "학급 이벤트 참여 대상을 무작위로 연결해 따뜻한 관계 형성 활동을 운영하는 프로그램입니다.",
+        "tag": "이벤트",
+        "status": "웹앱 예정",
+        "action": "설계 보기",
+        "url": "#",
+        "children": [
+          {
+            "title": "마니또 매칭 웹앱 제작 예정",
+            "url": "#",
+            "action": "준비중"
+          }
+        ]
+      },
+      {
+        "id": "class-result-lookup",
+        "title": "평가 결과지 조회 프로그램",
+        "desc": "학생별 결과 확인과 개별 피드백 안내를 간편하게 연결하는 조회형 웹앱입니다.",
+        "tag": "결과조회",
+        "status": "웹앱 예정",
+        "action": "설계 보기",
+        "url": "#",
+        "children": [
+          {
+            "title": "평가 결과지 조회 웹앱 제작 예정",
+            "url": "#",
+            "action": "준비중"
+          }
+        ]
+      }
+    ]
+  }
+};
+    let currentType = "work";
+    let expandedToolId = null;
+    const FAVORITE_KEY = "simhaemath-lab-favorites-clean-v1";
+
+    const featureTitle = document.getElementById("featureTitle");
+    const featureDesc = document.getElementById("featureDesc");
+    const toolSectionTitle = document.getElementById("toolSectionTitle");
+    const toolSectionDesc = document.getElementById("toolSectionDesc");
+    const toolsGrid = document.getElementById("toolsGrid");
+    const tabButtons = document.querySelectorAll("[data-tab]");
+    const favoritesStrip = document.getElementById("favoritesStrip");
+    const favoriteChips = document.getElementById("favoriteChips");
+
+    function getAllItems() {
+      const items = [];
+      Object.entries(data).forEach(([type, group]) => {
+        group.tools.forEach((tool) => {
+          const id = tool.id || `${type}-${tool.title}`;
+          items.push({ id, type, title: tool.title, url: tool.url, special: tool.special, parentId: null });
+          if (Array.isArray(tool.children)) {
+            tool.children.forEach((child, index) => {
+              items.push({ id: `${id}::${index}`, type, title: child.title, url: child.url, parentId: id, childIndex: index });
+            });
+          }
+        });
+      });
+      return items;
+    }
+
+    function getFavorites() {
+      try { return JSON.parse(localStorage.getItem(FAVORITE_KEY)) || []; } catch (e) { return []; }
+    }
+    function setFavorites(ids) { localStorage.setItem(FAVORITE_KEY, JSON.stringify(ids)); }
+    function isFavorite(id) { return getFavorites().includes(id); }
+    function toggleFavorite(event, id) {
+      event.stopPropagation();
+      const favs = getFavorites();
+      const next = favs.includes(id) ? favs.filter((x) => x !== id) : [id, ...favs];
+      setFavorites(next);
+      renderTools(currentType);
+      renderFavorites();
+    }
+
+    function renderFavorites() {
+      const favs = getFavorites();
+      const lookup = new Map(getAllItems().map((item) => [item.id, item]));
+      const items = favs.map((id) => lookup.get(id)).filter(Boolean);
+      if (!items.length) {
+        favoritesStrip.classList.remove("show");
+        favoriteChips.innerHTML = "";
+        return;
+      }
+      favoritesStrip.classList.add("show");
+      favoriteChips.innerHTML = items.map((item) => `<button class="favorite-chip" type="button" onclick='openFavorite(${JSON.stringify(item.id)})'>${escapeHtml(item.title)}</button>`).join("");
+    }
+
+    function openFavorite(id) {
+      const item = getAllItems().find((x) => x.id === id);
+      if (!item) return;
+      if (item.url && item.url !== "#" && !item.parentId) { window.open(item.url, "_blank", "noopener,noreferrer"); return; }
+      if (item.url && item.url !== "#" && item.parentId) { window.open(item.url, "_blank", "noopener,noreferrer"); return; }
+      setActive(item.type);
+      expandedToolId = item.parentId || item.id;
+      renderTools(item.type);
+      document.getElementById("tools")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (item.special === "mindmap") openMindModal();
+      if (item.special === "classTimer") openClassTimerModal();
+    }
+
+    function escapeHtml(text) {
+      const map = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"};
+      return String(text ?? "").replace(/[&<>"']/g, (m) => map[m]);
+    }
+
+    function openUrl(url) {
+      if (!url || url === "#") return;
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function findToolById(toolId) {
+      for (const [type, group] of Object.entries(data)) {
+        const tool = group.tools.find((t) => (t.id || `${type}-${t.title}`) === toolId);
+        if (tool) return { type, tool };
+      }
+      return null;
+    }
+
+    function expandOrOpen(toolId) {
+      const found = findToolById(toolId);
+      if (!found) return;
+      const { type, tool } = found;
+      currentType = type;
+      if (tool.special === "mindmap") { openMindModal(); return; }
+      if (tool.special === "classTimer") { openClassTimerModal(); return; }
+      if (Array.isArray(tool.children) && tool.children.length) {
+        expandedToolId = expandedToolId === toolId ? null : toolId;
+        renderTools(type);
+        const card = document.querySelector(`[data-tool-id="${CSS.escape(toolId)}"]`);
+        if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+      }
+      openUrl(tool.url);
+    }
+
+    function renderToolCard(type, tool, favs) {
+      const toolId = tool.id || `${type}-${tool.title}`;
+      const hasChildren = Array.isArray(tool.children) && tool.children.length > 0;
+      const isExpanded = expandedToolId === toolId;
+      const action = tool.action || (hasChildren ? "펼치기" : (tool.url && tool.url !== "#" ? "열기" : "준비중"));
+      const childHtml = hasChildren ? `<div class="child-links">${tool.children.map((child, index) => {
+        const childId = `${toolId}::${index}`;
+        return `<div class="child-row">
+          <button class="child-star ${favs.includes(childId) ? "active" : ""}" type="button" title="즐겨찾기" onclick='toggleFavorite(event, ${JSON.stringify(childId)})'>★</button>
+          <div class="child-name">${escapeHtml(child.title)}</div>
+          <button class="child-open" type="button" onclick='event.stopPropagation(); openUrl(${JSON.stringify(child.url)})'>${escapeHtml(child.action || "열기")}</button>
+        </div>`;
+      }).join("")}</div>` : "";
+      return `<article class="tool-card ${isExpanded ? "expanded" : ""}" data-tool-id="${escapeHtml(toolId)}" onclick='expandOrOpen(${JSON.stringify(toolId)})'>
+        <div class="tool-main">
+          <div class="tool-top"><span class="tool-tag">${escapeHtml(tool.tag)}</span><button class="favorite-btn ${favs.includes(toolId) ? "active" : ""}" type="button" title="즐겨찾기" onclick='toggleFavorite(event, ${JSON.stringify(toolId)})'>★</button></div>
+          <h4>${escapeHtml(tool.title)}</h4>
+          <p>${escapeHtml(tool.desc)}</p>
+          ${childHtml}
+        </div>
+        <div class="tool-bottom"><span class="status">${escapeHtml(tool.status)}</span><button class="link-btn" type="button" onclick='event.stopPropagation(); expandOrOpen(${JSON.stringify(toolId)})'>${escapeHtml(action)}</button></div>
+      </article>`;
+    }
+
+    function renderTools(type = currentType) {
+      currentType = type || currentType || "work";
+      const current = data[currentType];
+      featureTitle.textContent = current.title;
+      featureDesc.textContent = current.desc;
+      const labelMap = { work: "업무 LAB", math: "수학 LAB", classroom: "담임 LAB" };
+      const guideMap = {
+        work: "업무 흐름을 가볍게 만드는 외부 서비스와 자동화 도구를 한곳에서 연결합니다.",
+        math: "수업 자료, 연산 앱, 강의실, 타이머 등 수학 수업 운영 도구를 모았습니다.",
+        classroom: "담임 운영에 필요한 자리 배치, 소속 정리, 이벤트, 결과 조회 도구를 정리합니다."
+      };
+      toolSectionTitle.textContent = "LAB별 바로가기";
+      if (toolSectionDesc) toolSectionDesc.textContent = "업무, 수학, 담임 도구를 영역별로 스크롤하며 바로 실행할 수 있습니다.";
+      tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === currentType));
+
+      const favs = getFavorites();
+      toolsGrid.className = "tools-grid lab-board";
+      const order = ["work", "math", "classroom"];
+      const shortLabel = { work: "업무", math: "수학", classroom: "담임" };
+      const laneGuide = {
+        work: "업무 사이트와 자동화 도구를 빠르게 확인합니다.",
+        math: "수업 앱과 강의 자료를 수업 흐름에 맞게 엽니다.",
+        classroom: "담임 운영 앱을 행사와 학급 관리에 맞게 활용합니다."
+      };
+      toolsGrid.innerHTML = order.map((laneType) => {
+        const group = data[laneType];
+        return `<section class="lab-lane ${laneType === currentType ? "active-lane" : ""}" data-lane="${laneType}">
+          <div class="lane-head" onclick='setActive(${JSON.stringify(laneType)})'>
+            <div class="lane-head-left">
+              <p class="lane-kicker">${shortLabel[laneType]} LAB</p>
+              <h3 class="lane-title">${escapeHtml(group.title)}</h3>
+              <p class="lane-desc">${escapeHtml(laneGuide[laneType] || group.desc)}</p>
+            </div>
+            <span class="lane-count">${group.tools.length}개</span>
+          </div>
+          <div class="lane-tools" aria-label="${shortLabel[laneType]} LAB 도구 목록">
+            ${group.tools.map((tool) => renderToolCard(laneType, tool, favs)).join("")}
+          </div>
+        </section>`;
+      }).join("");
+      renderFavorites();
+    }
+
+    function setActive(type) {
+      expandedToolId = null;
+      currentType = type;
+      renderTools(type);
+      const lane = document.querySelector(`[data-lane="${type}"]`);
+      if (lane) lane.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+    tabButtons.forEach((button) => button.addEventListener("click", () => setActive(button.dataset.tab)));
+
+    // Counts
+    const mathTools = data.math.tools.length;
+    const workTools = data.work.tools.length;
+    const classroomTools = data.classroom.tools.length;
+    document.getElementById("mathCount").textContent = `${mathTools} tools`;
+    document.getElementById("workCount").textContent = `${workTools} links`;
+    document.getElementById("classroomCount").textContent = `${classroomTools} apps`;
+    document.getElementById("toolCount").textContent = mathTools + workTools + classroomTools;
+
+    // Class timer modal web app
+    const classTimerModal = document.getElementById("classTimerModal");
+    const classTimerDisplay = document.getElementById("classTimerDisplay");
+    const classTimerStatus = document.getElementById("classTimerStatus");
+    const classTimerFill = document.getElementById("classTimerFill");
+    const classTimerMinutes = document.getElementById("classTimerMinutes");
+    const classTimerStart = document.getElementById("classTimerStart");
+    const classTimerPause = document.getElementById("classTimerPause");
+    const classTimerReset = document.getElementById("classTimerReset");
+    const classTimerApply = document.getElementById("classTimerApply");
+    const classTimerTest = document.getElementById("classTimerTest");
+
+    let classTimerTotal = 45 * 60;
+    let classTimerRemain = classTimerTotal;
+    let classTimerRunning = false;
+    let classTimerInterval = null;
+
+    function formatClassTimer(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const rest = seconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+    }
+
+    function updateClassTimer(statusText) {
+      classTimerDisplay.textContent = formatClassTimer(classTimerRemain);
+      classTimerFill.style.width = `${Math.max(0, Math.min(100, (classTimerRemain / classTimerTotal) * 100))}%`;
+      if (statusText) classTimerStatus.textContent = statusText;
+      classTimerStart.textContent = classTimerRunning ? "진행 중" : "시작";
+    }
+
+    function openClassTimerModal() {
+      classTimerModal.classList.add("show");
+      updateClassTimer();
+      setTimeout(() => classTimerMinutes.focus(), 50);
+    }
+
+    function closeClassTimerModal() {
+      classTimerModal.classList.remove("show");
+    }
+
+    function setClassTimerByMinutes(minutes) {
+      const safeMinutes = Math.max(1, Math.min(180, Number(minutes) || 45));
+      pauseClassTimer("시간을 조정했습니다. 시작을 누르면 타이머가 진행됩니다.");
+      classTimerMinutes.value = safeMinutes;
+      classTimerTotal = safeMinutes * 60;
+      classTimerRemain = classTimerTotal;
+      updateClassTimer("시간을 조정했습니다. 시작을 누르면 타이머가 진행됩니다.");
+    }
+
+    function startClassTimer() {
+      if (classTimerRemain <= 0) setClassTimerByMinutes(classTimerMinutes.value);
+      if (classTimerInterval) clearInterval(classTimerInterval);
+      classTimerRunning = true;
+      updateClassTimer("타이머가 진행 중입니다.");
+      classTimerInterval = setInterval(() => {
+        classTimerRemain = Math.max(0, classTimerRemain - 1);
+        if (classTimerRemain === 0) {
+          pauseClassTimer("시간이 종료되었습니다. 다음 활동으로 전환하세요.");
+          playClassTimerAlarm();
+          return;
+        }
+        updateClassTimer();
+      }, 1000);
+    }
+
+    function pauseClassTimer(statusText = "타이머가 일시정지되었습니다.") {
+      classTimerRunning = false;
+      if (classTimerInterval) clearInterval(classTimerInterval);
+      classTimerInterval = null;
+      updateClassTimer(statusText);
+    }
+
+    function resetClassTimer() {
+      pauseClassTimer("리셋되었습니다. 필요하면 시간을 다시 설정하세요.");
+      classTimerTotal = Math.max(1, Math.min(180, Number(classTimerMinutes.value) || 45)) * 60;
+      classTimerRemain = classTimerTotal;
+      updateClassTimer("리셋되었습니다. 필요하면 시간을 다시 설정하세요.");
+    }
+
+    function playClassTimerAlarm() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        const now = audioCtx.currentTime;
+        [0, 0.35, 0.7].forEach((delay) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(880, now + delay);
+          gain.gain.setValueAtTime(0.0001, now + delay);
+          gain.gain.exponentialRampToValueAtTime(0.24, now + delay + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.22);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + delay);
+          osc.stop(now + delay + 0.24);
+        });
+      } catch (error) {
+        alert("시간이 종료되었습니다.");
+      }
+    }
+
+    document.getElementById("classTimerClose").addEventListener("click", closeClassTimerModal);
+    classTimerModal.addEventListener("click", (e) => { if (e.target === classTimerModal) closeClassTimerModal(); });
+    classTimerApply.addEventListener("click", () => setClassTimerByMinutes(classTimerMinutes.value));
+    classTimerMinutes.addEventListener("keydown", (e) => { if (e.key === "Enter") setClassTimerByMinutes(classTimerMinutes.value); });
+    document.querySelectorAll("[data-min]").forEach((button) => {
+      button.addEventListener("click", () => setClassTimerByMinutes(button.dataset.min));
+    });
+    classTimerStart.addEventListener("click", startClassTimer);
+    classTimerPause.addEventListener("click", () => pauseClassTimer());
+    classTimerReset.addEventListener("click", resetClassTimer);
+    classTimerTest.addEventListener("click", () => { playClassTimerAlarm(); classTimerStatus.textContent = "종료음을 확인했습니다."; });
+    updateClassTimer();
+
+    // Mindmap modal and canvas
+    const mindModal = document.getElementById("mindModal");
+    const mindTopic = document.getElementById("mindTopic");
+    const mindCanvas = document.getElementById("mindCanvas");
+    const ctx = mindCanvas.getContext("2d");
+    function openMindModal() {
+      mindModal.classList.add("show");
+      setTimeout(() => mindTopic.focus(), 50);
+      drawMindmap(mindTopic.value.trim() || "수학 개념");
+    }
+    function closeMindModal() { mindModal.classList.remove("show"); }
+    document.getElementById("mindClose").addEventListener("click", closeMindModal);
+    mindModal.addEventListener("click", (e) => { if (e.target === mindModal) closeMindModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeMindModal(); closeClassTimerModal(); } });
+
+    function wrapText(text, maxChars) {
+      const s = String(text || "").trim();
+      if (!s) return [""];
+      const parts = s.split(/\s+/);
+      const lines = [];
+      let line = "";
+      parts.forEach((part) => {
+        if ((line + " " + part).trim().length > maxChars) {
+          if (line) lines.push(line);
+          if (part.length > maxChars) {
+            for (let i = 0; i < part.length; i += maxChars) lines.push(part.slice(i, i + maxChars));
+            line = "";
+          } else line = part;
+        } else line = (line + " " + part).trim();
+      });
+      if (line) lines.push(line);
+      return lines.slice(0, 4);
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    }
+
+    function drawTextBox(text, x, y, w, h, fontSize = 24, weight = 700) {
+      roundRect(x, y, w, h, 24);
+      ctx.fillStyle = "#ffffff"; ctx.fill();
+      ctx.strokeStyle = "#d9edf8"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = "#334155"; ctx.font = `${weight} ${fontSize}px Apple SD Gothic Neo, Noto Sans KR, sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      const maxChars = Math.max(7, Math.floor(w / (fontSize * 0.72)));
+      const lines = wrapText(text, maxChars);
+      const lineH = fontSize * 1.35;
+      const startY = y + h / 2 - ((lines.length - 1) * lineH) / 2;
+      lines.forEach((line, i) => ctx.fillText(line, x + w / 2, startY + i * lineH));
+    }
+
+    function drawMindmap(topic) {
+      const t = topic || "수학 개념";
+      ctx.clearRect(0, 0, mindCanvas.width, mindCanvas.height);
+      const grad = ctx.createLinearGradient(0, 0, mindCanvas.width, mindCanvas.height);
+      grad.addColorStop(0, "#f7fbff"); grad.addColorStop(1, "#edf7fc");
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, mindCanvas.width, mindCanvas.height);
+      ctx.fillStyle = "#5ea7cf"; ctx.font = "800 26px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "left"; ctx.fillText("심해수학 개념 마인드맵", 56, 62);
+      ctx.fillStyle = "#a3b2c1"; ctx.font = "600 18px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.fillText("주제에서 핵심 개념 → 계산 절차 → 대표 예시 → 자주 하는 실수로 확장", 56, 92);
+      const center = {x: 460, y: 295, w: 280, h: 128};
+      const nodes = [
+        {text: "핵심 개념", x: 88, y: 170, w: 245, h: 94},
+        {text: "공식 · 규칙", x: 850, y: 170, w: 245, h: 94},
+        {text: "대표 예시", x: 88, y: 448, w: 245, h: 94},
+        {text: "주의할 점", x: 850, y: 448, w: 245, h: 94},
+        {text: "수업 질문", x: 478, y: 596, w: 245, h: 94},
+      ];
+      ctx.strokeStyle = "#98c9e5"; ctx.lineWidth = 4;
+      nodes.forEach((n) => {
+        ctx.beginPath(); ctx.moveTo(center.x + center.w / 2, center.y + center.h / 2); ctx.lineTo(n.x + n.w / 2, n.y + n.h / 2); ctx.stroke();
+      });
+      drawTextBox(t, center.x, center.y, center.w, center.h, 30, 850);
+      nodes.forEach((n) => drawTextBox(n.text, n.x, n.y, n.w, n.h, 23, 800));
+      const subtexts = [
+        "정의와 의미를 한 문장으로 정리",
+        "계산 순서와 조건을 분리",
+        "간단한 수치로 먼저 확인",
+        "부호·괄호·단위 확인",
+        "왜 그렇게 되는지 설명하기"
+      ];
+      ctx.fillStyle = "#7c8a99"; ctx.font = "600 17px Apple SD Gothic Neo, Noto Sans KR, sans-serif"; ctx.textAlign = "center";
+      nodes.forEach((n, i) => ctx.fillText(subtexts[i], n.x + n.w / 2, n.y + n.h + 34));
+    }
+
+    function makePrompt() {
+      const topic = mindTopic.value.trim() || "수학 개념";
+      return `[심해수학 마인드맵 요청]
+주제: ${topic}
+중학생 수준에 맞게 핵심 개념, 공식과 규칙, 대표 예시, 자주 하는 실수, 수업 질문으로 나누어 마인드맵 형태로 정리해줘. 출력은 한눈에 보기 좋게 짧은 문장 중심으로 구성해줘.`;
+    }
+    async function copyPrompt() {
+      try { await navigator.clipboard.writeText(makePrompt()); } catch (e) { /* clipboard may be blocked */ }
+    }
+    document.getElementById("mindCreate").addEventListener("click", () => drawMindmap(mindTopic.value.trim() || "수학 개념"));
+    mindTopic.addEventListener("keydown", (e) => { if (e.key === "Enter") drawMindmap(mindTopic.value.trim() || "수학 개념"); });
+    document.getElementById("mindCopy").addEventListener("click", copyPrompt);
+    document.getElementById("mindNotebook").addEventListener("click", async () => { await copyPrompt(); window.open("https://notebooklm.google.com/", "_blank", "noopener,noreferrer"); });
+    document.getElementById("mindDownload").addEventListener("click", () => {
+      const topic = (mindTopic.value.trim() || "수학개념").replace(/[\/:*?"<>|]/g, "_");
+      const a = document.createElement("a"); a.href = mindCanvas.toDataURL("image/png"); a.download = `심해수학_마인드맵_${topic}.png`; a.click();
+    });
+    drawMindmap("수학 개념");
+
+    setActive("work");
+  </script>
+</body>
+</html>
