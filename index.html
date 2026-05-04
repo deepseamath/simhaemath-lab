@@ -623,6 +623,27 @@
       }
     }
 
+
+
+    /* 첫 화면 정리: Archive Structure 삭제 후 첫 화면이 드래그 없이 들어오도록 보정 */
+    @media (min-width: 981px) {
+      html, body { height: 100%; overflow: hidden; }
+      .page { min-height: 100vh; height: 100vh; overflow: hidden; }
+      header { padding: 14px 0 10px; }
+      .hero-grid { padding: 12px 0 14px; height: calc(100vh - 72px); overflow: hidden; }
+      .intro-card { align-self: stretch; overflow: hidden; }
+      .main-area { height: 100%; overflow: hidden; }
+      #tools { min-height: 0; overflow: hidden; }
+      .tools-grid.active-list {
+        max-height: calc(100vh - 292px);
+        min-height: 260px;
+        padding-bottom: 8px;
+      }
+      .tabs { flex-shrink: 0; }
+      .tab-card { min-height: 96px; padding: 17px; }
+      .section-head { flex-shrink: 0; }
+    }
+
   </style>
 </head>
 <body>
@@ -710,18 +731,8 @@
           </section>
         </div>
       </section>
-
-      <section class="container archive-card">
-        <div class="archive-title"><div class="archive-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4.5-8 4.5-8-4.5L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12l8 4.5 8-4.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 16.5l8 4.5 8-4.5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div><h3>Archive Structure</h3><p>앞으로 추가될 메뉴를 위한 기본 분류</p></div></div>
-        <div class="archive-grid">
-          <div class="archive-item"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l3 3v15H6V3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><h4>자료실</h4><p>PDF, 이미지, 활동지, 수업 자료를 정리</p></div>
-          <div class="archive-item"><svg viewBox="0 0 24 24" fill="none"><path d="M10.5 13.5l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 8l-2 2a4 4 0 0 0 5.7 5.7l2-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 16l2-2A4 4 0 0 0 11.3 8.3l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h4>링크 모음</h4><p>자주 쓰는 사이트와 외부 도구 연결</p></div>
-          <div class="archive-item"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 7h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><h4>업무 앱</h4><p>조회, 작성, 자동화 기능을 카드로 추가</p></div>
-        </div>
-      </section>
-    </main>
-    <footer><div class="container">심해수학 LAB · 업무, 수학, 담임 운영을 한곳에.</div></footer>
-  </div>
+</main>
+</div>
 
   <div class="modal-backdrop" id="mindModal" role="dialog" aria-modal="true" aria-label="개념 마인드맵 만들기">
     <div class="modal">
@@ -735,11 +746,10 @@
       </div>
       <div class="mind-actions">
         <button class="mind-btn" type="button" id="mindNotebook">NotebookLM 열기</button>
-        <button class="mind-btn" type="button" id="mindCopy">프롬프트 복사</button>
         <button class="mind-btn" type="button" id="mindDownload">PNG 저장</button>
       </div>
       <div class="mind-canvas-wrap"><canvas id="mindCanvas" width="1400" height="900"></canvas></div>
-      <p class="mind-note">NotebookLM 열기를 누르면 중학교 수학 교과서 수준으로 정리하도록 설계한 프롬프트가 복사됩니다. 필요하면 붙여 넣어 자료를 더 확장하세요.</p>
+      <p class="mind-note">NotebookLM 열기를 누르면 중학교 수학 교과서 수준으로 개념을 확장할 수 있도록 준비됩니다. 사이트 안에서는 입력한 주제를 바탕으로 마인드맵 이미지를 바로 생성할 수 있습니다.</p>
     </div>
   </div>
 
@@ -1859,7 +1869,6 @@
     }
     document.getElementById("mindCreate").addEventListener("click", () => drawMindmap(mindTopic.value.trim() || "수학 개념"));
     mindTopic.addEventListener("keydown", (e) => { if (e.key === "Enter") drawMindmap(mindTopic.value.trim() || "수학 개념"); });
-    document.getElementById("mindCopy").addEventListener("click", copyPrompt);
     document.getElementById("mindNotebook").addEventListener("click", async () => { await copyPrompt(); window.open("https://notebooklm.google.com/", "_blank", "noopener,noreferrer"); });
     document.getElementById("mindDownload").addEventListener("click", () => {
       const topic = (mindTopic.value.trim() || "수학개념").replace(/[\/:*?"<>|]/g, "_");
